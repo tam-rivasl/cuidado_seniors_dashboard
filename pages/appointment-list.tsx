@@ -11,18 +11,18 @@ export default function Home() {
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
 
   useEffect(() => {
-    getUsers();
+    getAppointment();
   }, []);
 
-  const getUsers = async () => {
+  const getAppointment = async () => {
     try {
-      const response = await fetch('/api/getUsers');
+      const response = await fetch('/api/getAppointment');
       if (!response.ok) {
         throw new Error('La solicitud no tuvo éxito');
       }
       const data = await response.json();
-      console.log('data', data);
-      setList(data);
+      setList(data[0]);
+      console.log('data', data[0]);
     } catch (error) {
       messageApi.open({
         type: 'error',
@@ -41,60 +41,58 @@ export default function Home() {
 
   const columns = [
     {
-      title: 'Nombre',
+      title: 'Nombre Enfermera',
       width: 100,
-      dataIndex: 'firstName',
-      key: 'firstName',
-      fixed: 'left',
+      render: (item: any)=>  item.nurse.firstName + item.nurse.lastName,
+      key: 'nurse',
     },
     {
-      title: 'Apellido',
+      title: 'Plan Service Name',
       width: 100,
-      dataIndex: 'lastName',
-      key: 'lastName',
-      fixed: 'left',
+      render: (item: any)=>  item.plan_service?.planServiceName ?? 'No Data',
+      key: 'plan_service',
       sorter: true,
     },
     {
-      title: 'Número de Teléfono',
-      width: 150,
-      dataIndex: 'phoneNumber',
-      key: 'phoneNumber',
-      sorter: true,
-    },
-    {
-      title: 'Edad',
+      title: 'Price',
       width: 100,
-      dataIndex: 'age',
-      key: 'age',
+      render: (item: any)=>  item.plan_service?.price ?? 'No Data',
+      key: 'plan_service',
       sorter: true,
     },
     {
-      title: 'Género',
+      title: 'Description',
       width: 100,
-      dataIndex: 'gender',
-      key: 'gender',
+      render: (item: any)=>  item.plan_service?.description ?? 'No Data',
+      key: 'plan_service',
       sorter: true,
     },
     {
-      title: 'RUT',
-      width: 150,
-      dataIndex: 'identificationNumber',
-      key: 'rut',
+      title: 'Start Time',
+      width: 100,
+      render: (item: any)=>  item.plan_service?.startTime ?? 'No Data',
+      key: 'plan_service',
       sorter: true,
     },
     {
-      title: 'Email',
+      title: 'End Time',
+      width: 100,
+      render: (item: any)=>  item.plan_service?.endTime ?? 'No Data',
+      key: 'plan_service',
+      sorter: true,
+    },
+    {
+      title: 'Status',
       width: 200,
-      dataIndex: 'email',
-      key: 'email',
+      dataIndex: 'status',
+      key: 'status',
       sorter: true,
     },
     {
-      title: 'Fecha de Nacimiento',
+      title: 'Date',
       width: 150,
-      dataIndex: 'birthDate',
-      key: 'birthDate',
+      dataIndex: 'date',
+      key: 'date',
       sorter: true,
     },
     {

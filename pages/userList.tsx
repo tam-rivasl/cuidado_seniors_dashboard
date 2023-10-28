@@ -11,18 +11,19 @@ export default function Home() {
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
 
   useEffect(() => {
-    getAppointment();
+    console.log(localStorage.getItem('email'))
+    getUsers();
   }, []);
 
-  const getAppointment = async () => {
+  const getUsers = async () => {
     try {
-      const response = await fetch('/api/getAppointment');
+      const response = await fetch('/api/getUsers');
       if (!response.ok) {
         throw new Error('La solicitud no tuvo éxito');
       }
       const data = await response.json();
-      setList(data[0]);
-      console.log('data', data[0]);
+      console.log('data', data);
+      setList(data);
     } catch (error) {
       messageApi.open({
         type: 'error',
@@ -41,58 +42,60 @@ export default function Home() {
 
   const columns = [
     {
-      title: 'Nombre Enfermera',
+      title: 'Nombre',
       width: 100,
-      render: (item: any)=>  item.nurse.firstName + item.nurse.lastName,
-      key: 'nurse',
+      dataIndex: 'firstName',
+      key: 'firstName',
+      fixed: 'left',
     },
     {
-      title: 'Plan Service Name',
+      title: 'Apellido',
       width: 100,
-      render: (item: any)=>  item.plan_service?.planServiceName ?? 'No Data',
-      key: 'plan_service',
+      dataIndex: 'lastName',
+      key: 'lastName',
+      fixed: 'left',
       sorter: true,
     },
     {
-      title: 'Price',
-      width: 100,
-      render: (item: any)=>  item.plan_service?.price ?? 'No Data',
-      key: 'plan_service',
-      sorter: true,
-    },
-    {
-      title: 'Description',
-      width: 100,
-      render: (item: any)=>  item.plan_service?.description ?? 'No Data',
-      key: 'plan_service',
-      sorter: true,
-    },
-    {
-      title: 'Start Time',
-      width: 100,
-      render: (item: any)=>  item.plan_service?.startTime ?? 'No Data',
-      key: 'plan_service',
-      sorter: true,
-    },
-    {
-      title: 'End Time',
-      width: 100,
-      render: (item: any)=>  item.plan_service?.endTime ?? 'No Data',
-      key: 'plan_service',
-      sorter: true,
-    },
-    {
-      title: 'Status',
-      width: 200,
-      dataIndex: 'status',
-      key: 'status',
-      sorter: true,
-    },
-    {
-      title: 'Date',
+      title: 'Número de Teléfono',
       width: 150,
-      dataIndex: 'date',
-      key: 'date',
+      dataIndex: 'phoneNumber',
+      key: 'phoneNumber',
+      sorter: true,
+    },
+    {
+      title: 'Edad',
+      width: 100,
+      dataIndex: 'age',
+      key: 'age',
+      sorter: true,
+    },
+    {
+      title: 'Género',
+      width: 100,
+      dataIndex: 'gender',
+      key: 'gender',
+      sorter: true,
+    },
+    {
+      title: 'RUT',
+      width: 150,
+      dataIndex: 'identificationNumber',
+      key: 'rut',
+      sorter: true,
+    },
+    {
+      title: 'Email',
+      width: 200,
+      dataIndex: 'email',
+      key: 'email',
+      sorter: true,
+    },
+    {
+      title: 'Fecha de Nacimiento',
+      width: 150,
+      dataIndex: 'birthDate',
+      key: 'birthDate',
       sorter: true,
     },
     {

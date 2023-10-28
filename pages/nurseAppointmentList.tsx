@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Layout, theme, Button, message } from 'antd';
+import { Table, Layout, theme, Button, message, Form, notification} from 'antd';
 import MenuComponent from '../components/menu'; // Ajusta la ruta de importación según la ubicación de MenuComponent
+import getAppointmentNurse from './api/getAppointmentNurse';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -9,30 +10,65 @@ export default function Home() {
   const [messageApi] = message.useMessage();
   const [list, setList] = useState([] as Array<any>);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
-
+  const [form] = Form.useForm();
+  const [userId, setUserId] = useState('' as any);
   useEffect(() => {
-    getAppointment();
-  }, []);
-
-  const getAppointment = async () => {
-    try {
-      const response = await fetch('/api/getAppointment');
-      if (!response.ok) {
-        throw new Error('La solicitud no tuvo éxito');
-      }
-      const data = await response.json();
-      setList(data[0]);
-      console.log('data', data[0]);
-    } catch (error) {
-      messageApi.open({
-        type: 'error',
-        content: error?.message ?? 'La solicitud no tuvo éxito',
-      });
+    const userId: any = localStorage.getItem("userId");
+    if (userId) {
+        console.log('user id lo encontro', userId)
+      setUserId(parseInt(userId)); // Establece el nombre del usuario en el estado
     }
-  };
-
+  }, []);
+  useEffect(() => {
+    getAppointmentNurses();
+  }, [userId]);
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
+  };
+
+  // Función para mostrar notificaciones de éxito
+  const showSuccessNotification = (message: any) => {
+    notification.success({
+      message: 'Éxito',
+      description: message,
+      placement: 'topRight', // Cambia la ubicación según tus necesidades
+    });
+  };
+
+  // Función para mostrar notificaciones de error
+  const showErrorNotification = (error: any) => {
+    notification.error({
+      message: 'Error',
+      description: error,
+      placement: 'topRight', // Cambia la ubicación según tus necesidades
+    });
+  };
+  
+ const getAppointmentNurses = ()=> {
+    const requestBody = {
+        userId: userId,
+        };
+    fetch("/api/getAppointmentNurse", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody),
+  })
+    .then(async (response) => {
+      if (response.ok) {
+        const data = await response.json();
+        setList(data[0])
+      } else {
+        response.json().then((data) => {
+          showErrorNotification(data.message || "Error al cargar el listado de citas ");
+        });
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      showErrorNotification(error.message || "Error al consultar Api ");
+    });
   };
 
   const {
@@ -40,12 +76,6 @@ export default function Home() {
   } = theme.useToken();
 
   const columns = [
-    {
-      title: 'Nombre Enfermera',
-      width: 100,
-      render: (item: any)=>  item.nurse.firstName + item.nurse.lastName,
-      key: 'nurse',
-    },
     {
       title: 'Plan Service Name',
       width: 100,
@@ -96,21 +126,27 @@ export default function Home() {
       sorter: true,
     },
     {
-      title: 'Acciones',
-      key: 'operation',
-      fixed: 'right',
-      width: 100,
-      render: () => <Button>Editar</Button>,
-    },
+        title: 'Nombre Paciente',
+        width: 150,
+        render: (item: any)=> item.patient?.firstName  ?? 'No Data',
+        key: 'patient',
+        sorter: true,
+ },
+ {
+    title: 'Apellido Paciente',
+    width: 150,
+    render: (item: any)=>  item.patient?.lasName ?? 'No Data',
+    key: 'patient',
+    sorter: true,
+},
+ {
+    title: 'Direccion',
+    width: 150,
+    render: (item: any)=>  item.patient?.address ?? 'No Data',
+    key: 'patient',
+    sorter: true,
+},
   ];
-
-  const onFinish = (values: any) => {
-    console.log('Success:', values);
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -130,3 +166,5 @@ export default function Home() {
     </Layout>
   );
 }
+
+

@@ -7,49 +7,64 @@ import {
   message,
   DatePicker,
   Input,
+  TimePicker,
   Row,
   Col,
+  Menu,
+  notification,  // Importa notification de Ant Design
 } from "antd";
-import type { MenuProps } from "antd";
+import {
+  DesktopOutlined,
+  CalendarOutlined,
+  FormOutlined,
+} from "@ant-design/icons";
+
 import getPlanService from "./api/getPlanService";
-import MenuComponent from '../components/menu';
+import MenuComponent from "../components/menu";
+import moment from "moment";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Option } = Select;
-
-type MenuItem = Required<MenuProps>["items"][number];
-
-function getItem(
-  label: React.ReactNode,
-  key: React.Key,
-  icon?: React.ReactNode,
-  children?: MenuItem[]
-): MenuItem {
-  return {
-    key,
-    icon,
-    children,
-    label,
-  } as MenuItem;
-}
 
 export default function Home() {
   const [form] = Form.useForm();
   const [messageApi] = message.useMessage();
   const [planServiceData, setPlanService] = useState([] as any);
   const [collapsed, setCollapsed] = useState(false);
-  const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
+
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
   };
+
+  // Función para mostrar notificaciones de éxito
+  const showSuccessNotification = (message: any) => {
+    notification.success({
+      message: 'Éxito',
+      description: message,
+      placement: 'topRight', // Cambia la ubicación según tus necesidades
+    });
+  };
+
+  // Función para mostrar notificaciones de error
+  const showErrorNotification = (error: any) => {
+    notification.error({
+      message: 'Error',
+      description: error,
+      placement: 'topRight', // Cambia la ubicación según tus necesidades
+    });
+  };
+
   const onFinish = (formValues: any) => {
     console.log("form:", formValues);
+    console.log(localStorage.getItem('userId'))
     const date = formValues.date.format("YYYY-MM-DD");
     const requestBody = {
       date: date,
-      plan_service: formValues.plan_service,
+      plan_serviceId: formValues.plan_service,
+      nurseId: localStorage.getItem('userId')
     };
-    // Realiza la solicitud a la API con el objeto requestBody
+    
     fetch("/api/createAppointment", {
       method: "POST",
       headers: {
@@ -57,21 +72,22 @@ export default function Home() {
       },
       body: JSON.stringify(requestBody),
     })
-      .then((_) => {
-        messageApi.open({
-          type: "success",
-          content: "Cita creada correctamente !!",
-        });
-        // Puedes restablecer el formulario después de un éxito si es necesario
-        form.resetFields();
+      .then((response) => {
+        if (response.ok) {
+          showSuccessNotification("Cita creada correctamente !!");
+          form.resetFields();
+        } else {
+          response.json().then((data) => {
+            showErrorNotification(data.message || "Hubo un problema al crear la cita ");
+          });
+        }
       })
       .catch((error) => {
-        messageApi.open({
-          type: "error",
-          content: error.message || "Error al crear la cita",
-        });
+        console.error(error);
+        showErrorNotification(error.message || "Error al crear la cita");
       });
-  };
+    };
+    
 
   const validateEndTime = (rule, value, callback) => {
     if (value <= form.getFieldValue("startTime")) {
@@ -92,23 +108,37 @@ export default function Home() {
         throw new Error("La solicitud no tuvo éxito");
       }
       const data = await response.json();
-      console.log("data", data);
       setPlanService(data);
     } catch (error: any) {
-      messageApi.open({
-        type: "error",
-        content: error?.message ?? "La solicitud no tuvo éxito",
+      showErrorNotification(error?.message || "La solicitud no tuvo éxito");
+    }
+  };
+
+  const handlePlanServiceChange = (value: any) => {
+    // Busca el plan de servicio seleccionado en planServiceData
+    const selectedPlan = planServiceData.find((plan: { plan_serviceId: any; }) => plan.plan_serviceId === value);
+
+    if (selectedPlan) {
+      // Actualiza el formulario con los datos del plan de servicio seleccionado
+      form.setFieldsValue({
+        startTime: moment(selectedPlan.startTime, "HH:mm"),
+        endTime: moment(selectedPlan.endTime, "HH:mm"),
+        description: selectedPlan.description,
       });
     }
   };
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
-       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+      >
         <div className="demo-logo-vertical" />
         <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: "#fff" }} />
         <Content style={{ margin: "0 16px", background: "#fff", padding: 50 }}>
           <Form
             form={form}
@@ -141,19 +171,49 @@ export default function Home() {
                       value: item.plan_serviceId,
                       label: item.planServiceName,
                     }))}
+                    onChange={handlePlanServiceChange}
                   />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    style={{ width: "100%", marginTop: 30 }}
-                  >
-                    Crear Cita
-                  </Button>
+                <Form.Item
+                  label="Hora de Inicio"
+                  name="startTime"
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
+                >
+                  <TimePicker format="HH:mm" style={{ width: "100%" }} disabled/>
                 </Form.Item>
+              </Col>
+              <Col xs={24} md={12} xl={8}>
+                <Form.Item
+                  label="Hora de Término"
+                  name="endTime"
+                  rules={[
+                    { required: true, message: "Campo obligatorio" },
+                    { validator: validateEndTime },
+                  ]}
+                >
+                  <TimePicker format="HH:mm" style={{ width: "100%" }} disabled/>
+                </Form.Item>
+              </Col>
+
+              <Col xs={24} md={12} xl={8}>
+                <Form.Item
+                  label="Descripción"
+                  name="description"
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
+                >
+                  <Input style={{ width: "100%" }} disabled />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12} xl={8}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  style={{ width: "100%", marginTop: 30 }}
+                >
+                  Crear Cita
+                </Button>
               </Col>
             </Row>
           </Form>

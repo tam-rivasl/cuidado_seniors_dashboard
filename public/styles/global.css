@@ -1,0 +1,99 @@
+/* styles.css */
+/*@tailwind base;
+@tailwind components;
+@tailwind utilities;*/
+
+body{
+  margin: 0;
+  padding: 0;
+}
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(120deg, rgba(173, 216, 230, 0.5), rgba(173, 216, 230, 0.5)), #fff;
+  padding-top: 0;
+}
+.card-login {
+  width: 400px;
+  border-radius: 0;
+  border: none;
+  box-shadow: 0 0 20px 0 rgba(173, 216, 230, 0.8);
+  height: 100vh;
+}
+.card-register{
+  width: 600px;
+  border-radius: 0;
+  border: none;
+  box-shadow: 0 0 20px 0 rgba(173, 216, 230, 0.8);
+}
+.logo {
+  display: block;
+  margin: auto;
+  width: 200px;
+  height: 200px;
+}
+
+.buttom-register{
+  margin-top: 0px
+}
+.w-100{
+ width: '100%'
+}
+.Content {
+    margin: '0 16px';
+    background: 'colorBgContainer';
+    padding: 50 ;
+  }
+
+.logo-register{
+  display: block;
+  margin: auto;
+  width: 150px;
+  height: 150px;
+}
+
+.txt-italic {
+  font-style: italic;
+}
+
+.Header-appointment{
+  padding: 0; 
+  background: "#fff";
+
+}
+.events {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.events .ant-badge-status {
+  width: 100%;
+  overflow: hidden;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.notes-month {
+  font-size: 28px;
+  text-align: center;
+}
+.notes-month section {
+  font-size: 28px;
+}
+/* Media query para pantallas más grandes que 576px */
+@media (min-width: 577px) {
+  .container {
+    height: 100vh;
+    padding: 20px;
+    /* Estilos para pantallas más grandes que 576px con la propiedad height */
+  }
+  .card-register{
+    border-radius: 20px;
+  }
+  
+  .card-login {
+  border-radius: 20px;
+  height: 600px;
+}
+}

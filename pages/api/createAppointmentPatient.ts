@@ -1,12 +1,9 @@
-import { message } from 'antd';
-import { NextApiRequest, NextApiResponse } from 'next';
-
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+export default async (req: any, res: any) => {
   try {
     const mapedData = { ...req.body };
     console.log(mapedData);
     const apiUrl: string =
-      process.env.NEXT_PUBLIC_API_URL + `/appointment/create/appointment`;
+      process.env.NEXT_PUBLIC_API_URL + `/appointment/assign/appointment`;
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
@@ -18,11 +15,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (response.ok) {
       const data = await response.json();
       res.status(200).json(data);
+      console.log("data:", data);
     } else {
-      throw new Error( "Error en la solicitud API");
+      const errorResponse = await response.json();
+      res.status(response.status).json(errorResponse);
     }
   } catch (error: any) {
-    console.error('Error:', error);
     res
       .status(500)
       .json({ error: error.message || "Error al obtener datos de la API" });

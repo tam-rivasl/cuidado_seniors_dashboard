@@ -1,7 +1,8 @@
 export default async (req: any, res: any) => {
   try {
-    const mapedData = { ...req.body, age: parseInt(req.body.age), status: 'active', rolName: 'user' };
+    const mapedData = { ...req.body, age: parseInt(req.body.age), rolId: req.body.nurseConfirmation ? 1 : 2};
     console.log(mapedData);
+    delete mapedData.nurseConfirmation;
     const apiUrl: string =
       process.env.NEXT_PUBLIC_API_URL + "/user/create" ?? "";
     const response = await fetch(apiUrl, {

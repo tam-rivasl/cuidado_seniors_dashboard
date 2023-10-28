@@ -1,10 +1,11 @@
 "use client"
-import React from 'react';
+import React, { useState } from 'react';
 import {
   UserOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { message, Layout, theme, Button, Col, Row, DatePicker, Select, Form, Input } from 'antd';
+import MenuComponent from '@/components/menu';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -25,7 +26,8 @@ function getItem(
 }
 
 export default function Home() {
-
+  const [collapsed, setCollapsed] = useState(false);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
   const [messageApi] = message.useMessage();
 
   const {
@@ -54,7 +56,9 @@ export default function Home() {
         });
       });
   };
-
+  const handleMenuSelect = (keys: string[]) => {
+    setSelectedKeys(keys);
+  };
   const onFinishFailed = (errorInfo: any) => {
     messageApi.open({
       type: 'error',
@@ -64,6 +68,10 @@ export default function Home() {
 
   return (
     <Layout style={{ minHeight: '100vh' }} >
+        <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+        <div className="demo-logo-vertical" />
+        <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
+      </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }} />
         <Content style={{ margin: '0 16px', background: colorBgContainer, padding: 50 }}>
@@ -145,6 +153,17 @@ export default function Home() {
                 <Form.Item
                   label="Edad"
                   name="age"
+                  rules={[
+                    { required: true, message: 'Campo obligatorio' }
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12} xl={8}>
+                <Form.Item
+                  label="Direccion"
+                  name="adress"
                   rules={[
                     { required: true, message: 'Campo obligatorio' }
                   ]}

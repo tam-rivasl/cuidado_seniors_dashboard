@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Layout, theme, Button, message } from 'antd';
+import { Table, Layout, Button, message } from 'antd';
 import MenuComponent from '../components/menu'; // Ajusta la ruta de importación según la ubicación de MenuComponent
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Footer, Sider } = Layout;
 
 export default function PlanServiceList() {
   const [collapsed, setCollapsed] = useState(false);
@@ -34,42 +34,37 @@ export default function PlanServiceList() {
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
   };
-
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
-
   const columns = [
     {
-      title: 'Plan Service Name',
+      title: 'Nombre Plan',
       width: 100,
       render: (item: any)=>  item.planServiceName ?? 'No Data',
       key: 'planServiceName',
       sorter: true,
     },
     {
-      title: 'Price',
+      title: 'Precio',
       width: 100,
       render: (item: any)=>  item.price ?? 'No Data',
       key: 'price',
       sorter: true,
     },
     {
-      title: 'Description',
+      title: 'Descripcion',
       width: 100,
       render: (item: any)=>  item.description ?? 'No Data',
       key: 'description',
       sorter: true,
     },
     {
-      title: 'Start Time',
+      title: 'Hora inicio',
       width: 100,
       render: (item: any)=>  item.startTime ?? 'No Data',
       key: 'startTime',
       sorter: true,
     },
     {
-      title: 'End Time',
+      title: 'Hora Termino',
       width: 100,
       render: (item: any)=>  item.endTime ?? 'No Data',
       key: 'endTime',
@@ -77,7 +72,7 @@ export default function PlanServiceList() {
     },
     {
       title: 'Status',
-      width: 200,
+      width: 100,
       dataIndex: 'status',
       key: 'status',
       sorter: true,
@@ -91,24 +86,14 @@ export default function PlanServiceList() {
     },
   ];
 
-  const onFinish = (values: any) => {
-    console.log('Success:', values);
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-        <div className="demo-logo-vertical" />
         <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
-        <Content style={{ margin: '0 16px', background: colorBgContainer }}>
-          <div style={{ padding: 24, minHeight: 360 }}>
+        <Content>
+          <div  className='tabsList' style={{backgroundColor: 'Background'}}>
             <Table columns={columns} dataSource={list} scroll={{ x: 1300 }} />
           </div>
         </Content>

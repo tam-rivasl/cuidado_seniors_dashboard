@@ -3,7 +3,7 @@ export default async (req: any, res: any) => {
     const mapedData = { ...req.body };
     console.log(mapedData);
     const apiUrl: string =
-      process.env.NEXT_PUBLIC_API_URL + `/appointment/assign/appointment`;
+      process.env.NEXT_PUBLIC_API_URL + "/appointment/assign/appointment";
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {

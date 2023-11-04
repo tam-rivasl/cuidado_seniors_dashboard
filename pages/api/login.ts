@@ -13,9 +13,12 @@ export default async (req: any, res: any) => {
         body: JSON.stringify(mapedData),
       });
   
-      const data = await response.json();
-      res.status(200).json(data);
-      console.log('data:', data)
+      if (response.ok) {
+        const data = await response.json();
+        res.status(200).json(data);
+      } else {
+        throw new Error( "Error en la solicitud API");
+      }
     } catch (error: any) {
       res
         .status(500)

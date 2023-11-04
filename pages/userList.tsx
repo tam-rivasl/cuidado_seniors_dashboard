@@ -36,29 +36,24 @@ export default function Home() {
     setSelectedKeys(keys);
   };
 
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
-
   const columns = [
     {
       title: 'Nombre',
       width: 100,
       dataIndex: 'firstName',
       key: 'firstName',
-      fixed: 'left',
+      sorter: true,
     },
     {
       title: 'Apellido',
       width: 100,
       dataIndex: 'lastName',
       key: 'lastName',
-      fixed: 'left',
       sorter: true,
     },
     {
       title: 'Número de Teléfono',
-      width: 150,
+      width: 100,
       dataIndex: 'phoneNumber',
       key: 'phoneNumber',
       sorter: true,
@@ -79,14 +74,14 @@ export default function Home() {
     },
     {
       title: 'RUT',
-      width: 150,
+      width: 100,
       dataIndex: 'identificationNumber',
       key: 'rut',
       sorter: true,
     },
     {
       title: 'Email',
-      width: 200,
+      width: 150,
       dataIndex: 'email',
       key: 'email',
       sorter: true,
@@ -107,24 +102,14 @@ export default function Home() {
     },
   ];
 
-  const onFinish = (values: any) => {
-    console.log('Success:', values);
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-        <div className="demo-logo-vertical" />
         <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
-        <Content style={{ margin: '0 16px', background: colorBgContainer }}>
-          <div style={{ padding: 24, minHeight: 360 }}>
+        <Content>
+          <div className='tabsList' style={{backgroundColor: 'Background'}}>
             <Table columns={columns} dataSource={list} scroll={{ x: 1300 }} />
           </div>
         </Content>

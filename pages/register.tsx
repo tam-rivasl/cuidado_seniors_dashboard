@@ -3,7 +3,6 @@ import { LoginOutlined, UserOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import {
   message,
-  Layout,
   Button,
   Col,
   Row,
@@ -14,10 +13,6 @@ import {
   Card,
   Checkbox,
 } from "antd";
-//import 'public/styles/global.css'; // Asegúrate de usar la ruta correcta al archivo CSS
-import { Container } from "postcss";
-
-const { Content, Footer } = Layout;
 
 type MenuItem = Required<MenuProps>["items"][number];
 

@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Layout, theme, Button, message, Form, notification} from 'antd';
+import { Table, Layout, notification} from 'antd';
 import MenuComponent from '../components/menu'; // Ajusta la ruta de importación según la ubicación de MenuComponent
-import getAppointmentNurse from './api/getAppointmentNurse';
 
-const { Header, Content, Footer, Sider } = Layout;
+
+const { Content, Footer, Sider } = Layout;
 
 export default function Home() {
   const [collapsed, setCollapsed] = useState(false);
-  const [messageApi] = message.useMessage();
   const [list, setList] = useState([] as Array<any>);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
-  const [form] = Form.useForm();
   const [userId, setUserId] = useState('' as any);
   useEffect(() => {
     const userId: any = localStorage.getItem("userId");
@@ -71,10 +69,6 @@ export default function Home() {
     });
   };
 
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
-
   const columns = [
     {
       title: 'Plan Service Name',
@@ -113,7 +107,7 @@ export default function Home() {
     },
     {
       title: 'Status',
-      width: 200,
+      width: 100,
       dataIndex: 'status',
       key: 'status',
       sorter: true,
@@ -135,7 +129,7 @@ export default function Home() {
  {
     title: 'Apellido Paciente',
     width: 150,
-    render: (item: any)=>  item.patient?.lasName ?? 'No Data',
+    render: (item: any)=>  item.patient?.lastName ?? 'No Data',
     key: 'patient',
     sorter: true,
 },
@@ -151,13 +145,11 @@ export default function Home() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-        <div className="demo-logo-vertical" />
         <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
-        <Content style={{ margin: '0 16px', background: colorBgContainer }}>
-          <div style={{ padding: 24, minHeight: 360 }}>
+        <Content>
+          <div  className='tabsList' style={{backgroundColor: 'Background'}}>
             <Table columns={columns} dataSource={list} scroll={{ x: 1300 }} />
           </div>
         </Content>

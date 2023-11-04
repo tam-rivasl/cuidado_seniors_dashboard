@@ -10,12 +10,13 @@ import {
   TimePicker,
   Row,
   Col,
+  notification,
 } from "antd";
 import moment from "moment";
-import MenuComponent from "@/components/menu";
+import MenuComponent from "../components/menu";
 
-const { Header, Content, Footer, Sider } = Layout;
-const { Option } = Select;
+const { Content, Footer, Sider } = Layout;
+
 
 export default function Home() {
   const [form] = Form.useForm();
@@ -25,10 +26,24 @@ export default function Home() {
   const [nurses, setNurses] = useState([]);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
 
+  const showSuccessNotification = (message: any) => {
+    notification.success({
+      message: 'Éxito',
+      description: message,
+      placement: 'topRight', // Cambia la ubicación según tus necesidades
+    });
+  };
 
+  // Función para mostrar notificaciones de error
+  const showErrorNotification = (error: any) => {
+    notification.error({
+      message: 'Error',
+      description: error,
+      placement: 'topRight', // Cambia la ubicación según tus necesidades
+    });
+  }; 
   const handleDateChange = async (date: any) => {
-    // Hacer una solicitud para obtener los datos de los planes y las enfermeras disponibles para la fecha seleccionada
-    try {
+      try {
       const requestBody = {
         date: date.format("YYYY-MM-DD"),
         plan_serviceId: form.getFieldValue("plan_serviceId"),
@@ -46,19 +61,14 @@ export default function Home() {
         const result = await response.json();
         console.log('result', result)
         setNurses(result.map((data:any)=>{return{ ...data.nurse , appointmentId: data.appointmentId}}));
-
-        messageApi.open({
-          type: "success",
-          content: "Datos cargados correctamente !!",
-        });
+        //form.resetFields();
       } else {
-        throw new Error("Error al cargar los datos");
+        response.json().then((data) => {
+          showErrorNotification(data.message || "Hubo un problema al crear la cita ");
+        });
       }
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: error.message || "Error al cargar los datos",
-      });
+      showErrorNotification(error.message || "Error al crear la cita");
     }
   };
 
@@ -76,10 +86,11 @@ console.log(handlePlanServiceChange);
     try {
       // Realizar la creación de la cita
       const requestBody = {
-        patient: localStorage.getItem('userId'),
+        patientId: localStorage.getItem('userId'),
         appointmentId:  formValues.appointmentId ,
       };
 
+      console.log('user iddddd?,', requestBody.patientId)
       const response = await fetch("/api/createAppointmentPatient", {
         method: "POST",
         headers: {
@@ -138,17 +149,23 @@ console.log(handlePlanServiceChange);
         collapsed={collapsed}
         onCollapse={(value) => setCollapsed(value)}
       >
-        <div className="demo-logo-vertical" />
         <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
       </Sider>
       <Layout>
-        <Content style={{ margin: "0 16px", background: "#fff", padding: 50 }}>
-          <Form
+        <Content>
+          <Form className="form-perfil"
             form={form}
             name="appointment"
             onFinish={onFinish}
             layout="vertical"
-            style={{ padding: 20 }}
+            style={{
+              boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
+              borderRadius: "10px",
+              padding: "20px",
+              margin: "20px",
+              marginBlock: "50px",
+              backgroundColor: "Background",
+            }}
           >
             <Row gutter={16}>
               <Col xs={24} md={12} xl={8}>

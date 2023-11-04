@@ -11,7 +11,7 @@ body{
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(120deg, rgba(173, 216, 230, 0.5), rgba(173, 216, 230, 0.5)), #fff;
+ /background: linear-gradient(120deg, rgba(173, 216, 230, 0.5), rgba(173, 216, 230, 0.5)), #fff;
   padding-top: 0;
 }
 .card-login {
@@ -41,11 +41,19 @@ body{
  width: '100%'
 }
 .Content {
-    margin: '0 16px';
-    background: 'colorBgContainer';
+    margin: 0 16px;
+    //background: background;
     padding: 50 ;
   }
 
+  .tabsList {
+    margin: 20px;
+    padding: 20px ;
+    marginBlock: 50px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  }
+ 
 .logo-register{
   display: block;
   margin: auto;
@@ -81,6 +89,43 @@ body{
 .notes-month section {
   font-size: 28px;
 }
+.welcome-message {
+  text-align: center;
+  margin-top: 8px; /* Espacio entre el Avatar y el mensaje */
+  color: #fff; /* Color del texto del mensaje de bienvenida */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+.menu-container {
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px; /* Espacio interior para el menú */
+}
+
+.one-page {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+section {
+  margin: 30px 0;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+
 /* Media query para pantallas más grandes que 576px */
 @media (min-width: 577px) {
   .container {

@@ -1,10 +1,17 @@
 import React from 'react';
-import { Button, Checkbox, Form, Input, Card, Typography } from 'antd';
+import { Button, Checkbox, Form, Input, Card, Typography, notification } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { useRouter } from 'next/router'; // Importa el enrutador de Next.js
 
 const { Text } = Typography;
+const showErrorNotification = (error: any) => {
+  notification.error({
+    message: 'Error',
+    description: error,
+    placement: 'topRight', // Cambia la ubicación según tus necesidades
+  });
+};
 
 async function postData(data: any) {
   try {
@@ -17,7 +24,9 @@ async function postData(data: any) {
     });
 
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      response.json().then((data) => {
+        showErrorNotification(data.message || "Credenciales invalidas, intente nuevamente");
+      });
     }
 
     return response.json();
@@ -28,8 +37,7 @@ async function postData(data: any) {
 }
 
 const App: React.FC = () => {
-  const router = useRouter(); // Inicializa el enrutador de Next.js
-
+  const router = useRouter(); 
   const onFinish = async (values: any) => {
     console.log('Success:', values);
 

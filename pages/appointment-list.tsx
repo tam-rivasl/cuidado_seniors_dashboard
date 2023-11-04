@@ -35,61 +35,57 @@ export default function Home() {
     setSelectedKeys(keys);
   };
 
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
-
   const columns = [
     {
       title: 'Nombre Enfermera',
-      width: 100,
-      render: (item: any)=>  item.nurse.firstName + item.nurse.lastName,
+      width: 180,
+      render: (item: any)=>  item.nurse.firstName + (' ') + item.nurse.lastName,
       key: 'nurse',
     },
     {
-      title: 'Plan Service Name',
-      width: 100,
+      title: 'Nombre Plan',
+        width: 180,
       render: (item: any)=>  item.plan_service?.planServiceName ?? 'No Data',
       key: 'plan_service',
       sorter: true,
     },
     {
-      title: 'Price',
-      width: 100,
+      title: 'Precio',
+        width: 150,
       render: (item: any)=>  item.plan_service?.price ?? 'No Data',
       key: 'plan_service',
       sorter: true,
     },
     {
-      title: 'Description',
-      width: 100,
+      title: 'Descripcion',
+        width: 150,
       render: (item: any)=>  item.plan_service?.description ?? 'No Data',
       key: 'plan_service',
       sorter: true,
     },
     {
-      title: 'Start Time',
-      width: 100,
+      title: 'Hora de inicio',
+        width: 150,
       render: (item: any)=>  item.plan_service?.startTime ?? 'No Data',
       key: 'plan_service',
       sorter: true,
     },
     {
-      title: 'End Time',
-      width: 100,
+      title: 'Hora de termino',
+        width: 150,
       render: (item: any)=>  item.plan_service?.endTime ?? 'No Data',
       key: 'plan_service',
       sorter: true,
     },
     {
       title: 'Status',
-      width: 200,
+      width: 150,
       dataIndex: 'status',
       key: 'status',
       sorter: true,
     },
     {
-      title: 'Date',
+      title: 'Fecha',
       width: 150,
       dataIndex: 'date',
       key: 'date',
@@ -99,29 +95,20 @@ export default function Home() {
       title: 'Acciones',
       key: 'operation',
       fixed: 'right',
-      width: 100,
+      width: 150,
       render: () => <Button>Editar</Button>,
     },
   ];
 
-  const onFinish = (values: any) => {
-    console.log('Success:', values);
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-        <div className="demo-logo-vertical" />
         <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
-        <Content style={{ margin: '0 16px', background: colorBgContainer }}>
-          <div style={{ padding: 24, minHeight: 360 }}>
+        <Content>
+          <div className='tabsList' style={{backgroundColor: 'Background'}}>
             <Table columns={columns} dataSource={list} scroll={{ x: 1300 }} />
           </div>
         </Content>

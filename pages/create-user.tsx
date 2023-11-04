@@ -1,13 +1,10 @@
 "use client"
 import React, { useState } from 'react';
-import {
-  UserOutlined,
-} from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { message, Layout, theme, Button, Col, Row, DatePicker, Select, Form, Input } from 'antd';
 import MenuComponent from '@/components/menu';
 
-const { Header, Content, Footer, Sider } = Layout;
+const {Content, Footer, Sider } = Layout;
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -73,13 +70,20 @@ export default function Home() {
         <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
-        <Content style={{ margin: '0 16px', background: colorBgContainer, padding: 50 }}>
+        <Content>
           <Form
             name="basic"
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
             layout="vertical"
+            style={{
+              boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
+              borderRadius: "10px",
+              padding: "20px",
+              margin: "20px",
+              marginBlock: "50px",
+              backgroundColor: "Background",
+            }}
           >
             <Row gutter={16}>
               <Col xs={24} md={12} xl={8}>
@@ -197,7 +201,11 @@ export default function Home() {
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
-                <Button htmlType="submit" block >
+              <Button
+                  type="primary"
+                  htmlType="submit"
+                  style={{ width: "100%", marginTop: 30 }}
+                >
                   Registrarse
                 </Button>
               </Col>

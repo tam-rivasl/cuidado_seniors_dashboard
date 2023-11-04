@@ -10,25 +10,16 @@ import {
   TimePicker,
   Row,
   Col,
-  Menu,
   notification,  // Importa notification de Ant Design
 } from "antd";
-import {
-  DesktopOutlined,
-  CalendarOutlined,
-  FormOutlined,
-} from "@ant-design/icons";
 
-import getPlanService from "./api/getPlanService";
 import MenuComponent from "../components/menu";
 import moment from "moment";
 
-const { Header, Content, Footer, Sider } = Layout;
-const { Option } = Select;
+const { Content, Footer, Sider } = Layout;
 
 export default function Home() {
   const [form] = Form.useForm();
-  const [messageApi] = message.useMessage();
   const [planServiceData, setPlanService] = useState([] as any);
   const [collapsed, setCollapsed] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
@@ -135,17 +126,23 @@ export default function Home() {
         collapsed={collapsed}
         onCollapse={(value) => setCollapsed(value)}
       >
-        <div className="demo-logo-vertical" />
         <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
       </Sider>
       <Layout>
-        <Content style={{ margin: "0 16px", background: "#fff", padding: 50 }}>
+        <Content>
           <Form
             form={form}
             name="appointment"
             onFinish={onFinish}
             layout="vertical"
-            style={{ padding: 20 }}
+            style={{
+              boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
+              borderRadius: "10px",
+              padding: "20px",
+              margin: "20px",
+              marginBlock: "50px",
+              backgroundColor: "Background",
+            }}
           >
             <Row gutter={16}>
               <Col xs={24} md={12} xl={8}>

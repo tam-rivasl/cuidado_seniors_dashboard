@@ -52,7 +52,7 @@ const App: React.FC = () => {
       localStorage.setItem('lastName', response.lastName);
 
       // Aquí puedes manejar la respuesta, como redireccionar al usuario a una página diferente.
-      router.push('/'); // Cambia '/dashboard' a la página a la que deseas redirigir al usuario.
+      router.push('dashboard'); // Cambia '/dashboard' a la página a la que deseas redirigir al usuario.
     } catch (error) {
       console.error('Error:', error);
       // Maneja el error, por ejemplo, muestra un mensaje de error al usuario.

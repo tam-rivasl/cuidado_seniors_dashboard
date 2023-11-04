@@ -52,10 +52,10 @@ export default function Home() {
     const date = formValues.date.format("YYYY-MM-DD");
     const requestBody = {
       date: date,
-      plan_serviceId: formValues.plan_service,
+      plan_serviceId: formValues.plan_serviceId,
       nurseId: localStorage.getItem('userId')
     };
-    
+    console.log(formValues.plan_serviceId,'req')
     fetch("/api/createAppointment", {
       method: "POST",
       headers: {
@@ -69,7 +69,7 @@ export default function Home() {
           form.resetFields();
         } else {
           response.json().then((data) => {
-            showErrorNotification(data.message || "Hubo un problema al crear la cita ");
+            showErrorNotification(data.message || "No existen citas para la fecha");
           });
         }
       })
@@ -158,7 +158,7 @@ export default function Home() {
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
                   label="Plan de Servicio"
-                  name="plan_service"
+                  name="plan_serviceId"
                   rules={[{ required: true, message: "Campo obligatorio" }]}
                   style={{ width: "100%" }}
                 >

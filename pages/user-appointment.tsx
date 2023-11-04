@@ -48,7 +48,7 @@ export default function Home() {
         date: date.format("YYYY-MM-DD"),
         plan_serviceId: form.getFieldValue("plan_serviceId"),
       };
-
+      console.log('requesbody?:', requestBody)
       const response = await fetch("/api/getAppointmentsByDate", {
         method: "POST",
         headers: {
@@ -64,7 +64,7 @@ export default function Home() {
         //form.resetFields();
       } else {
         response.json().then((data) => {
-          showErrorNotification(data.message || "Hubo un problema al crear la cita ");
+          showErrorNotification(data.message || "No existe citas para la fecha indicada");
         });
       }
     } catch (error) {
@@ -72,8 +72,8 @@ export default function Home() {
     }
   };
 
-  const handlePlanServiceChange = async(plan_service:any)=>{ 
-    const foundPlanService: any = planServiceData.find((data: any) => data.plan_serviceId === plan_service);
+  const handlePlanServiceChange = async(plan_serviceId:any)=>{ 
+    const foundPlanService: any = planServiceData.find((data: any) => data.plan_serviceId === plan_serviceId);
     form.setFieldsValue({
       startTime: moment(foundPlanService.startTime, "HH:mm"),
       endTime: moment(foundPlanService.endTime, "HH:mm"),
@@ -168,21 +168,7 @@ console.log(handlePlanServiceChange);
             }}
           >
             <Row gutter={16}>
-              <Col xs={24} md={12} xl={8}>
-                <Form.Item
-                  label="Fecha"
-                  name="date"
-                  rules={[{ required: true, message: "Campo obligatorio" }]}
-                  style={{ width: "100%" }}
-                >
-                  <DatePicker
-                    format="YYYY-MM-DD"
-                    style={{ width: "100%" }}
-                    onChange={handleDateChange}
-                  />
-                </Form.Item>
-              </Col>
-              <Col xs={24} md={12} xl={8}>
+            <Col xs={24} md={12} xl={8}>
                 <Form.Item
                   label="Plan de Servicio"
                   name="plan_serviceId"
@@ -198,6 +184,20 @@ console.log(handlePlanServiceChange);
                     onChange={handlePlanServiceChange} 
                   />
                 </Form.Item >
+              </Col>
+              <Col xs={24} md={12} xl={8}>
+                <Form.Item
+                  label="Fecha"
+                  name="date"
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
+                  style={{ width: "100%" }}
+                >
+                  <DatePicker //disabled={!form.getFieldValue('plan_serviceId')}
+                    format="YYYY-MM-DD"
+                    style={{ width: "100%" }}
+                    onChange={handleDateChange}
+                  />
+                </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
                 <Form.Item

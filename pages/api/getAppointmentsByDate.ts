@@ -1,6 +1,6 @@
 export default async (req: any, res: any) => {
     try {
-        const mapedData = { date: req.body.date, plan_service:{plan_serviceId: req.body.plan_serviceId}, status: 'pending'  };
+        const mapedData = { date: req.body.date, plan_serviceId: req.body.plan_serviceId, status: 'pending'  };
       console.log(mapedData);
         const apiUrl: string = process.env.NEXT_PUBLIC_API_URL+"/appointment/byDate";
         const response = await fetch(apiUrl,{

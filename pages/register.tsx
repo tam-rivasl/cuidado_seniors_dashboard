@@ -30,6 +30,7 @@ function getItem(
   } as MenuItem;
 }
 
+
 export default function Home() {
   const [messageApi] = message.useMessage();
 
@@ -66,6 +67,14 @@ export default function Home() {
   return (
     <div className="container">
       <Card className="card-register">
+      <Button
+        key="login"
+        type="primary"
+        style={{
+          position: 'absolute', top: '20px', left: '20px', backgroundColor: 'transparent', borderColor: 'transparent', color: 'blue', 
+        }}>
+        <a href="/">Volver a Inicio</a>
+      </Button>
       <img
         src="/img/register.png" // Ruta relativa a la carpeta "public"
         className="logo-register"
@@ -234,8 +243,8 @@ export default function Home() {
               </Form.Item>
             </Col>
             <Col xs={24}>
-              <Button htmlType="submit" block className="w-100" type="primary"  icon={<LoginOutlined />}>
-                Registrarse
+              <Button key="login" htmlType="submit" block className="w-100" type="primary"  icon={<LoginOutlined />}>
+                <a href="/login"> Registrarse </a>
               </Button>
             </Col>
           </Row>

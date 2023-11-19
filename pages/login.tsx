@@ -71,6 +71,9 @@ const App: React.FC = () => {
   return (
     <div className="container">
       <Card className="card-login">
+          <Link href="/" color='primary'>
+            Volver a Inicio
+          </Link>
         <img
           src="/img/logo.png"
           className="logo"
@@ -137,6 +140,7 @@ const App: React.FC = () => {
           <Link href="register" color='primary'>
             Registrarse
           </Link>
+
         </div>
       </Card>
     </div>

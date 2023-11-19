@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Descriptions, notification, Row, Col, Layout, theme } from "antd";
+import {
+  Descriptions,
+  notification,
+  Row,
+  Col,
+  Layout,
+  theme,
+  Button,
+  Modal,
+} from "antd";
 import MenuComponent from "../components/menu"; // Asegúrate de importar el componente del menú
 import type { DescriptionsProps } from "antd";
 
@@ -64,7 +73,7 @@ export default function UserProfile() {
       placement: "topRight",
     });
   };
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const items: DescriptionsProps["items"] = [
     {
       label: "Nombre",
@@ -104,36 +113,70 @@ export default function UserProfile() {
     },
   ];
 
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+      >
         <div className="demo-logo-vertical" />
-        <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
+        <MenuComponent
+          selectedKeys={selectedKeys}
+          onMenuSelect={handleMenuSelect}
+        />
       </Sider>
       <Layout>
         <Content>
           <Row justify="center">
-              <div
-                style={{
-                  boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
-                  borderRadius: "10px",
-                  padding: '20px',
-                  margin: '60px',
-                  marginBlock: "50px"
-                }}
-              >
-                <Descriptions
-                  title="Mi Perfil"
-                  bordered
-                  column={{ xs: 1, sm: 1, md: 4, lg: 3, xl: 1, xxl: 4 }}
-                  items={items}
-                />
-              </div>
+            <div
+              style={{
+                boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
+                borderRadius: "10px",
+                padding: "20px",
+                margin: "60px",
+                marginBlock: "50px",
+              }}
+            >
+              <Descriptions
+                title="Mi Perfil"
+                bordered
+                column={{ xs: 1, sm: 1, md: 4, lg: 3, xl: 1, xxl: 4 }}
+                items={items}
+              />
+            </div>
           </Row>
+
+          <>
+            <Button type="primary" onClick={showModal}>
+              Open Modal
+            </Button>
+            <Modal
+              title="Basic Modal"
+              open={isModalOpen}
+              onOk={handleOk}
+              onCancel={handleCancel}
+            >
+              <p>Some contents...</p>
+              <p>Some contents...</p>
+              <p>Some contents...</p>
+            </Modal>
+          </>
         </Content>
-        <Footer style={{ textAlign: 'center' }}></Footer>
+        <Footer style={{ textAlign: "center" }}></Footer>
       </Layout>
     </Layout>
   );
-
 }

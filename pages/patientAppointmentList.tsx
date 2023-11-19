@@ -122,6 +122,15 @@ export default function PatientAppointmentList() {
     key: 'patient',
     sorter: true,
 },
+{
+  title: 'Acciones',
+  key: 'operation',
+  fixed: 'right',
+  width: 100,
+  render: () => <Button>Cancelar</Button>,
+  //href para que direccione a crear cita. 
+  //render: () => <Button>Reageandar</Button>,
+},
   ];
 
   return (

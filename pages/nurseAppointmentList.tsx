@@ -11,10 +11,9 @@ import {
   Col,
   Row,
   Tabs,
+  Empty,
 } from "antd";
 import {
-  AndroidOutlined,
-  AppleOutlined,
   AuditOutlined,
   BarsOutlined,
   CalendarOutlined,
@@ -23,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import MenuComponent from "@/components/menu";
 import moment from "moment";
+import { message } from "antd";
 const { Content, Footer, Sider } = Layout;
 
 export default function Home() {
@@ -36,6 +36,7 @@ export default function Home() {
   const { TextArea } = Input;
   const [form] = Form.useForm();
   const [observations, setObservations] = useState([] as Array<any>);
+  const [contactEmergency, setContact] = useState([] as Array<any>);
   const [activeTabKey, setActiveTabKey] = useState<string>("observations");
 
   const showErrorNotification = (error: any) => {
@@ -85,28 +86,32 @@ export default function Home() {
 
     // Extract appointmentId from the current row
     const appointmentId = record?.appointmentId;
-
+    const patientId = record?.patientId;
     // Check if appointmentId is available and observations array is empty
-    if (appointmentId && observations.length === 0) {
+    if (appointmentId && observations.length >= 0) {
       getObservations(appointmentId);
       console.log("appointmentId", appointmentId);
     }
-
+    if (patientId ) {
+      getContactEmergency(patientId);
+      console.log("patient id de contact", patientId);
+    }
     setModalDetailsVisible(true);
   };
 
   const handleCloseModalDetails = () => {
     setSelectedRow(null);
+    setContact([null]);
     setModalDetailsVisible(false);
   };
 
   const onFinish = async (formValues: any) => {
     try {
       const requestBody = {
-        title: formValues.title,
-        description: formValues.description,
-        observationType: formValues.observationType,
-        nurseId: localStorage.getItem("userId"),
+        title: formValues?.title,
+        description: formValues?.description,
+        observationType: formValues?.observationType,
+        nurseId: localStorage?.getItem("userId"),
         status: "active",
         appointmentId: selectedRow?.appointmentId,
       };
@@ -159,6 +164,7 @@ export default function Home() {
           setList(data[0]);
         } else {
           response.json().then((data) => {
+            console.log(data.message, "error del contact?");
             showErrorNotification(
               data.message || "Error al cargar el listado de citas "
             );
@@ -199,10 +205,40 @@ export default function Home() {
     }
   };
 
+  const getContactEmergency = async (patientId: number) => {
+    try {
+      const requestBody = {
+        patientId: patientId,
+      };
+  
+      const response = await fetch("/api/getContactEmergency", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        const emergencyContactData = responseData[0]?.map(item => item.emergency_contact);
+  
+          console.log("Emergency Contact Data:", emergencyContactData);
+          setContact(emergencyContactData);
+      } else {
+        const data = await response.json();
+        console.log("data error?", data);
+        showErrorNotification(data.message || "Error al cargar contactos de emergencia");
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorNotification(error.message || "Error al consultar la API");
+    }
+  };  
   const ObservationsList = () => {
     return (
       <div>
-        <Table
+        <Table className="mi-tabla"
           columns={[
             {
               title: "Título",
@@ -238,13 +274,46 @@ export default function Home() {
       </div>
     );
   };
+  console.log("contactEmergency en Home:", contactEmergency);
+
+  const EmergencyContact = () => {
+    const interfaceContact = contactEmergency.map((entry) => ({
+      firstName: entry?.firstName,
+      lastName: entry?.lastName,
+      email: entry?.email,
+      phoneNumber: entry?.phoneNumber,
+      relationship: entry?.relationship,
+    }));
+    return (
+      console.log(interfaceContact, "entry??"),
+      (
+        <div>
+          <Table className="mi-tabla"
+            columns={[
+              { title: "Nombre", dataIndex: "firstName", key: "firstName" },
+              { title: "Apellido", dataIndex: "lastName", key: "lastName" },
+              { title: "Email", dataIndex: "email", key: "email" },
+              {
+                title: "Numero de telefono",
+                dataIndex: "phoneNumber",
+                key: "phoneNumber",
+              },
+              {
+                title: "Relacion",
+                dataIndex: "relationship",
+                key: "relationship",
+              },
+            ]}
+            dataSource={interfaceContact}
+            pagination={{ pageSize: 10 }}
+          />
+        </div>
+      )
+    );
+  };
 
   const MedicalRecord = () => {
     return <div>Contenido de la otra pestaña</div>;
-  };
-
-  const EmergencyContact = () => {
-    return <div>Contenido de contacto de emergencia</div>;
   };
   const tabsConfig = [
     {
@@ -269,14 +338,15 @@ export default function Home() {
 
   const ModalDetails = (
     <Modal
+      className="Modal"
       title="Detalles de Cita"
-      open={modalDetailsVisible} 
+      open={modalDetailsVisible}
       onCancel={() => handleCloseModalDetails()}
       footer={null}
       style={{ width: "90%" }}
     >
       {modalDetailsVisible && (
-        <Tabs
+        <Tabs 
           defaultActiveKey={tabsConfig[0].key}
           activeKey={activeTabKey}
           onChange={(key) => setActiveTabKey(key)}
@@ -298,7 +368,6 @@ export default function Home() {
       )}
     </Modal>
   );
-  
 
   const ModalForm = (
     <Modal
@@ -318,7 +387,7 @@ export default function Home() {
         onFinish={onFinish}
         layout="vertical"
         initialValues={{ size: "default" }}
-        size={"small"}
+        size={"middle"}
         style={{ maxWidth: 600 }}
       >
         <Form.Item
@@ -351,10 +420,10 @@ export default function Home() {
           <TextArea rows={4} />
         </Form.Item>
         <Form.Item>
-          <Button
+          <Button className="responsive-button"
             type="primary"
             htmlType="submit"
-            style={{ flex: 1, justifyContent: "space-between", width: "45%" }}
+            style={{ width: '100%', marginBottom: '5px' }}
           >
             Guardar Observacion
           </Button>
@@ -364,12 +433,7 @@ export default function Home() {
               form.resetFields();
               handleCloseModal();
             }}
-            style={{
-              flex: 1,
-              justifyContent: "space-between",
-              width: "50%",
-              marginLeft: 20,
-            }}
+            style={{ width: '100%', marginBottom: '5px' }}
           >
             Cancelar
           </Button>

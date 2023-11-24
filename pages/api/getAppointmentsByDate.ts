@@ -19,6 +19,6 @@ export default async (req: any, res: any) => {
       } catch (error: any) {
         res
           .status(500)
-          .json({ error: error.message || "Error al obtener datos de la API" });
+          .json({ error: error || "Error al obtener datos de la API" });
       }
     };

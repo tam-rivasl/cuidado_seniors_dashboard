@@ -1,5 +1,6 @@
+//sirve para ficha medica y agregar usuario nuevo.
 import React, { useEffect, useState } from 'react';
-import { Table, Layout, notification} from 'antd';
+import { Table, Layout, notification, Button, Form, Input, Modal} from 'antd';
 import MenuComponent from '../components/menu'; // Ajusta la ruta de importación según la ubicación de MenuComponent
 
 
@@ -10,6 +11,7 @@ export default function Home() {
   const [list, setList] = useState([] as Array<any>);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
   const [userId, setUserId] = useState('' as any);
+  const [modalVisible, setModalVisible] = useState(false);
   useEffect(() => {
     const userId: any = localStorage.getItem("userId");
     if (userId) {
@@ -23,6 +25,37 @@ export default function Home() {
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
   };
+
+  const handleOpenModal = () => {
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
+ // Renderizar el formulario dentro del modal
+ const ModalForm = (
+  <Modal
+    title="Agregar Cita"
+    open={modalVisible}
+    onCancel={handleCloseModal}
+    footer={null}
+  >
+    {/* Aquí deberías poner tu formulario */}
+    <Form>
+      <Form.Item label="Campo 1">
+        <Input />
+      </Form.Item>
+      {/* Agrega más campos según tus necesidades */}
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Guardar
+        </Button>
+      </Form.Item>
+    </Form>
+  </Modal>
+);
 
   // Función para mostrar notificaciones de error
   const showErrorNotification = (error: any) => {
@@ -141,11 +174,15 @@ export default function Home() {
       <Layout>
         <Content>
           <div  className='tabsList' style={{backgroundColor: 'Background'}}>
+          <Button type="primary" onClick={handleOpenModal}>
+              Agregar Cita
+            </Button>
             <Table columns={columns} dataSource={list} scroll={{ x: 1300 }} />
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}></Footer>
       </Layout>
+      {ModalForm}
     </Layout>
   );
 }

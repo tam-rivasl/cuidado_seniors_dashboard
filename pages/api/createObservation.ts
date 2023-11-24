@@ -1,12 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { message } from 'antd';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const mapedData = { ...req.body };
     console.log(mapedData);
     const apiUrl: string =
-      process.env.NEXT_PUBLIC_API_URL + "/appointment/create/appointment";
+      process.env.NEXT_PUBLIC_API_URL + "/observation/create/observation";
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {

@@ -111,6 +111,11 @@ export default function UserProfile() {
       label: "Direccion",
       children: user.address || "N/A",
     },
+
+    {
+      label: "Direccion",
+      children: user.address || "N/A",
+    },
   ];
 
   const showModal = () => {

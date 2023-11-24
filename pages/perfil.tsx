@@ -11,6 +11,7 @@ import {
 } from "antd";
 import MenuComponent from "../components/menu"; // Asegúrate de importar el componente del menú
 import type { DescriptionsProps } from "antd";
+import moment from "moment";
 
 const { Sider, Content, Footer } = Layout;
 
@@ -97,7 +98,7 @@ export default function UserProfile() {
     },
     {
       label: "Fecha de Nacimiento",
-      children: user.birthDate || "N/A",
+      children: moment(user.birthDate).format("DD/MM/YYYY")  || "N/A",
     },
     {
       label: "Número de Teléfono",

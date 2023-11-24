@@ -5,7 +5,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const mapedData = { ...req.body };
     console.log(mapedData);
     const apiUrl: string =
-      process.env.NEXT_PUBLIC_API_URL + "/emergency-contact/create"
+      process.env.NEXT_PUBLIC_API_URL + '/emergency-contact/create';
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
@@ -13,12 +13,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       },
       body: JSON.stringify(mapedData),
     });
-
     if (response.ok) {
       const data = await response.json();
       res.status(200).json(data);
     } else {
-      throw new Error( "Error en la solicitud API");
+      const errorMessage = await response.text(); // Obtener el mensaje de error de la respuesta
+      console.error('Error en la solicitud API:', errorMessage);
+      throw new Error(errorMessage); // Lanzar un error con el mensaje obtenido desde la API
     }
   } catch (error: any) {
     console.error('Error:', error);

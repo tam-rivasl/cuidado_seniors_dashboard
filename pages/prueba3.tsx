@@ -22,7 +22,6 @@ import {
   PhoneOutlined,
 } from "@ant-design/icons";
 import MenuComponent from "@/components/menu";
-import moment from "moment";
 const { Content, Footer, Sider } = Layout;
 
 export default function Home() {
@@ -425,7 +424,6 @@ export default function Home() {
       title: "Date",
       width: 150,
       dataIndex: "date",
-      render: (text: string) => moment(text).format("DD/MM/YYYY") || "No Data",
       key: "date",
       sorter: true,
     },

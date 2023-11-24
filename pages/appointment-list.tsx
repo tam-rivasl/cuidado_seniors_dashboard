@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Layout, theme, Button, message } from 'antd';
 import MenuComponent from '../components/menu'; // Ajusta la ruta de importación según la ubicación de MenuComponent
+import moment from 'moment';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -89,6 +90,7 @@ export default function Home() {
       width: 150,
       dataIndex: 'date',
       key: 'date',
+      render: (text: string) => moment(text).format("DD/MM/YYYY") || "No Data",
       sorter: true,
     },
     {

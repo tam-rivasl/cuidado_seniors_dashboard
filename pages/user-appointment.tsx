@@ -18,13 +18,15 @@ import MenuComponent from "../components/menu";
 const { Content, Footer, Sider } = Layout;
 
 
-export default function Home() {
+export default function userAppointment() {
   const [form] = Form.useForm();
   const [messageApi] = message.useMessage();
   const [planServiceData, setPlanService] = useState([]);
   const [collapsed, setCollapsed] = useState(false);
   const [nurses, setNurses] = useState([]);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
+  const [datePickerDisabled, setDatePickerDisabled] = useState(true);
+  const [nursesSelectDisabled, setNursesSelectDisabled] = useState(true);
 
   const showSuccessNotification = (message: any) => {
     notification.success({
@@ -43,9 +45,14 @@ export default function Home() {
     });
   }; 
   const handleDateChange = async (date: any) => {
+    if (!date) {
+      console.log("Fecha no seleccionada");
+      setNursesSelectDisabled(true); // Deshabilitar el campo de selección de enfermeras
+      return;
+    }
       try {
       const requestBody = {
-        date: date.format("YYYY-MM-DD"),
+        date: date?.format("YYYY-MM-DD"),
         plan_serviceId: form.getFieldValue("plan_serviceId"),
       };
       console.log('requesbody?:', requestBody)
@@ -60,15 +67,19 @@ export default function Home() {
       if (response.ok) {
         const result = await response.json();
         console.log('result', result)
-        setNurses(result.map((data:any)=>{return{ ...data.nurse , appointmentId: data.appointmentId}}));
+        setNurses(result.map((data: any) => ({ ...data.nurse, appointmentId: data.appointmentId })));        
+        setNursesSelectDisabled(false); // Habilitar el campo de selección de enfermeras
         //form.resetFields();
       } else {
         response.json().then((data) => {
           showErrorNotification(data.message || "No existe citas para la fecha indicada");
+          setNursesSelectDisabled(true); 
         });
       }
     } catch (error) {
-      showErrorNotification(error.message || "Error al crear la cita");
+      console.log('error', error)
+      showErrorNotification(error || "Error al crear la cita");
+      setNursesSelectDisabled(true); // Deshabilitar el campo de selección de enfermeras en caso de error
     }
   };
 
@@ -80,7 +91,8 @@ export default function Home() {
       description: foundPlanService.description,
       price: foundPlanService.price,
     });
-  }
+    setDatePickerDisabled(!plan_serviceId);
+  };
 console.log(handlePlanServiceChange);
   const onFinish = async (formValues:any) => {
     try {
@@ -187,20 +199,6 @@ console.log(handlePlanServiceChange);
               </Col>
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
-                  label="Fecha"
-                  name="date"
-                  rules={[{ required: true, message: "Campo obligatorio" }]}
-                  style={{ width: "100%" }}
-                >
-                  <DatePicker //disabled={!form.getFieldValue('plan_serviceId')}
-                    format="YYYY-MM-DD"
-                    style={{ width: "100%" }}
-                    onChange={handleDateChange}
-                  />
-                </Form.Item>
-              </Col>
-              <Col xs={24} md={12} xl={8}>
-                <Form.Item
                   label="Hora de Inicio"
                   name="startTime"
                   rules={[{ required: true, message: "Campo obligatorio" }]}
@@ -239,11 +237,27 @@ console.log(handlePlanServiceChange);
               </Col>
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
+                  label="Fecha"
+                  name="date"
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
+                  style={{ width: "100%" }}
+                >
+                  <DatePicker //disabled={!form.getFieldValue('plan_serviceId')}
+                    format="YYYY-MM-DD"
+                    style={{ width: "100%" }}
+                    onChange={handleDateChange}
+                    disabled={datePickerDisabled}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12} xl={8}>
+                <Form.Item
                   label="Enfermeras"
                   name="appointmentId"
                   rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
                   <Select style={{ width: "100%" }}
+                  disabled={nursesSelectDisabled}
                   options={nurses.map((item) => ({
                     value: item.appointmentId,
                     label: item.firstName + ' ' + item.lastName 

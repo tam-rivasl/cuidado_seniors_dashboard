@@ -1,14 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { message } from 'antd';
-
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const mapedData = { ...req.body };
-    console.log(mapedData);
+    console.log('dataaaa', mapedData);
     const apiUrl: string =
-      process.env.NEXT_PUBLIC_API_URL + "/appointment/create/appointment";
+      process.env.NEXT_PUBLIC_API_URL + "/appointment/cancel";
     const response = await fetch(apiUrl, {
-      method: "POST",
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
@@ -20,13 +18,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(200).json(data);
     } else {
       const errorData = await response.json();
-      console.log(errorData, 'response')
-      throw new Error( errorData.message || "Error en la solicitud API");
+      console.error('Error en la solicitud API:', errorData.message);
+      throw new Error(errorData.message || "Appointment is already cancelled or expired");
     }
-  } catch (error: any) {
-    console.error('Error:', error);
-    res
-      .status(500)
-      .json({ error: error.message || "Error al obtener datos de la API" });
+  } catch (error) {
+    console.error('Error en la conexion de la API', error);
+    res.status(500).json({
+      error: "Error al procesar la solicitud en la API Appointment",
+    });
   }
 };

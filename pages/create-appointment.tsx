@@ -4,7 +4,6 @@ import {
   Form,
   Button,
   Layout,
-  message,
   DatePicker,
   Input,
   TimePicker,
@@ -23,7 +22,8 @@ export default function Home() {
   const [planServiceData, setPlanService] = useState([] as any);
   const [collapsed, setCollapsed] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
-
+  const [datePickerDisabled, setDatePickerDisabled] = useState(true);
+  
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
   };
@@ -46,7 +46,8 @@ export default function Home() {
     });
   };
 
-  const onFinish = (formValues: any) => {
+  const onFinish = async (formValues: any) => {
+   try{
     console.log("form:", formValues);
     console.log(localStorage.getItem('userId'))
     const date = formValues.date.format("YYYY-MM-DD");
@@ -56,38 +57,28 @@ export default function Home() {
       nurseId: localStorage.getItem('userId')
     };
     console.log(formValues.plan_serviceId,'req')
-    fetch("/api/createAppointment", {
+    const response = await fetch("/api/createAppointment", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
-    })
-      .then((response) => {
-        if (response.ok) {
-          showSuccessNotification("Cita creada correctamente !!");
-          form.resetFields();
-        } else {
-          response.json().then((data) => {
-            showErrorNotification(data.message || "No existen citas para la fecha");
-          });
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        showErrorNotification(error.message || "Error al crear la cita");
-      });
-    };
-    
+    });
 
-  const validateEndTime = (rule, value, callback) => {
-    if (value <= form.getFieldValue("startTime")) {
-      callback("La Hora de Término debe ser posterior a la Hora de Inicio");
+    if (response.ok) {
+      showSuccessNotification('Cita creada correctamente !!');
+      form.resetFields();
     } else {
-      callback();
+      const data = await response.json();
+      console.log("dataaa", data)
+      showErrorNotification(data.error || 'No existen citas para la fecha');
     }
-  };
-
+  } catch (error) {
+    console.error(error);
+    showErrorNotification(error || 'Error al crear la cita');
+  }
+};
+    
   useEffect(() => {
     getPlanService();
   }, []);
@@ -116,6 +107,7 @@ export default function Home() {
         endTime: moment(selectedPlan.endTime, "HH:mm"),
         description: selectedPlan.description,
       });
+      setDatePickerDisabled(!selectedPlan.plan_serviceId);
     }
   };
 
@@ -145,16 +137,6 @@ export default function Home() {
             }}
           >
             <Row gutter={16}>
-              <Col xs={24} md={12} xl={8}>
-                <Form.Item
-                  label="Fecha"
-                  name="date"
-                  rules={[{ required: true, message: "Campo obligatorio" }]}
-                  style={{ width: "100%" }}
-                >
-                  <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
                   label="Plan de Servicio"
@@ -187,13 +169,11 @@ export default function Home() {
                   name="endTime"
                   rules={[
                     { required: true, message: "Campo obligatorio" },
-                    { validator: validateEndTime },
                   ]}
                 >
                   <TimePicker format="HH:mm" style={{ width: "100%" }} disabled/>
                 </Form.Item>
               </Col>
-
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
                   label="Descripción"
@@ -201,6 +181,19 @@ export default function Home() {
                   rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
                   <Input style={{ width: "100%" }} disabled />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12} xl={8}>
+                <Form.Item
+                  label="Fecha"
+                  name="date"
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
+                  style={{ width: "100%" }}
+                >
+                  <DatePicker
+                   format="YYYY-MM-DD" style={{ width: "100%" }} 
+                   disabled={datePickerDisabled}
+                   />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>

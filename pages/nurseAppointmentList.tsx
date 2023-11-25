@@ -38,7 +38,8 @@ export default function Home() {
   const [observations, setObservations] = useState([] as Array<any>);
   const [contactEmergency, setContact] = useState([] as Array<any>);
   const [activeTabKey, setActiveTabKey] = useState<string>("observations");
-
+  const [medicalRecord, setMedicalRecord] = useState([] as any);
+  const [userData, setUserData] =  useState([] as Array<any>);
   const showErrorNotification = (error: any) => {
     notification.error({
       message: "Error",
@@ -80,28 +81,33 @@ export default function Home() {
     setModalVisible(false);
   };
 
-  const handleOpenModalDetails = (record: any) => {
+  const handleOpenModalDetails = async (record: any) => {
     setSelectedRow(record);
     setActiveTabKey("observations");
 
     // Extract appointmentId from the current row
     const appointmentId = record?.appointmentId;
     const patientId = record?.patientId;
+    if (patientId) {
+      await getMedicalRecord(patientId)
+      
+  }  
     // Check if appointmentId is available and observations array is empty
     if (appointmentId && observations.length >= 0) {
       getObservations(appointmentId);
       console.log("appointmentId", appointmentId);
     }
-    if (patientId ) {
+    if (patientId) {
       getContactEmergency(patientId);
       console.log("patient id de contact", patientId);
-    }
+    }  
     setModalDetailsVisible(true);
   };
 
   const handleCloseModalDetails = () => {
     setSelectedRow(null);
     setContact([null]);
+    setMedicalRecord([null])
     setModalDetailsVisible(false);
   };
 
@@ -210,7 +216,7 @@ export default function Home() {
       const requestBody = {
         patientId: patientId,
       };
-  
+
       const response = await fetch("/api/getContactEmergency", {
         method: "POST",
         headers: {
@@ -218,27 +224,54 @@ export default function Home() {
         },
         body: JSON.stringify(requestBody),
       });
-  
+
       if (response.ok) {
         const responseData = await response.json();
-        const emergencyContactData = responseData[0]?.map(item => item.emergency_contact);
-  
-          console.log("Emergency Contact Data:", emergencyContactData);
-          setContact(emergencyContactData);
+        const emergencyContactData = responseData[0]?.map(
+          (item) => item.emergency_contact
+        );
+
+        console.log("Emergency Contact Data:", emergencyContactData);
+        setContact(emergencyContactData);
       } else {
         const data = await response.json();
         console.log("data error?", data);
-        showErrorNotification(data.message || "Error al cargar contactos de emergencia");
+        showErrorNotification(
+          data.message || "Error al cargar contactos de emergencia"
+        );
       }
     } catch (error) {
       console.error(error);
       showErrorNotification(error.message || "Error al consultar la API");
     }
-  };  
+  };
+  const getMedicalRecord = async (patientId: number) => {
+      const requestBody = {
+        patientId: patientId,
+      };
+      console.log('id medicaaaal', patientId)
+      const response = await fetch("/api/getMedicalRecord", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("data medical record", data);
+        setMedicalRecord(data);
+      } else {
+        const data = await response.json();
+        console.log(data, "llega la data?");
+      }
+  };
   const ObservationsList = () => {
     return (
       <div>
-        <Table className="mi-tabla"
+        <Table
+          className="mi-tabla"
           columns={[
             {
               title: "Título",
@@ -288,7 +321,8 @@ export default function Home() {
       console.log(interfaceContact, "entry??"),
       (
         <div>
-          <Table className="mi-tabla"
+          <Table
+            className="mi-tabla"
             columns={[
               { title: "Nombre", dataIndex: "firstName", key: "firstName" },
               { title: "Apellido", dataIndex: "lastName", key: "lastName" },
@@ -313,7 +347,49 @@ export default function Home() {
   };
 
   const MedicalRecord = () => {
-    return <div>Contenido de la otra pestaña</div>;
+    const interfaceMedical = {
+      alergias: medicalRecord?.alergias,
+      medicamentos: medicalRecord?.medicamentos,
+      dosisMedicamentos: medicalRecord?.dosisMedicamentos,
+      tipoEnfermedad: medicalRecord?.tipoEnfermedad,
+      descripcionPatologia: medicalRecord?.descripcionPatologia,
+    };
+    return (
+      <div>
+        <Table
+          className="mi-tabla"
+          columns={[
+            {
+              title: "Alergias",
+              dataIndex: "alergias",
+              key: "alergias",
+            },
+            {
+              title: "Medicamentos",
+              dataIndex: "medicamentos",
+              key: "medicamentos",
+            },
+            {
+              title: "Dosis de Medicamentos",
+              dataIndex: "dosisMedicamentos",
+              key: "dosisMedicamentos",
+            },
+            {
+              title: "Tipo Enfermedad",
+              dataIndex: "tipoEnfermedad",
+              key: "tipoEnfermedad",
+            },
+            {
+              title: "Descripcion de Patologia",
+              dataIndex: "descripcionPatologia",
+              key: "descripcionPatologia",
+            },
+          ]}
+          dataSource={[interfaceMedical]}
+          pagination={{ pageSize: 10 }}
+       />
+      </div>
+    );
   };
   const tabsConfig = [
     {
@@ -346,7 +422,7 @@ export default function Home() {
       style={{ width: "90%" }}
     >
       {modalDetailsVisible && (
-        <Tabs 
+        <Tabs
           defaultActiveKey={tabsConfig[0].key}
           activeKey={activeTabKey}
           onChange={(key) => setActiveTabKey(key)}
@@ -420,10 +496,11 @@ export default function Home() {
           <TextArea rows={4} />
         </Form.Item>
         <Form.Item>
-          <Button className="responsive-button"
+          <Button
+            className="responsive-button"
             type="primary"
             htmlType="submit"
-            style={{ width: '100%', marginBottom: '5px' }}
+            style={{ width: "100%", marginBottom: "5px" }}
           >
             Guardar Observacion
           </Button>
@@ -433,7 +510,7 @@ export default function Home() {
               form.resetFields();
               handleCloseModal();
             }}
-            style={{ width: '100%', marginBottom: '5px' }}
+            style={{ width: "100%", marginBottom: "5px" }}
           >
             Cancelar
           </Button>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Layout, Button, message } from 'antd';
+import { Table, Layout, Button, message, notification, Popconfirm } from 'antd';
 import MenuComponent from '../components/menu'; // Ajusta la ruta de importación según la ubicación de MenuComponent
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 const { Content, Footer, Sider } = Layout;
 
@@ -9,7 +10,21 @@ export default function PlanServiceList() {
   const [messageApi] = message.useMessage();
   const [list, setList] = useState([] as Array<any>);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
-
+  const showSuccessNotification = (message: any) => {
+    notification.success({
+      message: "Éxito",
+      description: message,
+      placement: "topRight", // Cambia la ubicación según tus necesidades
+    });
+  };
+  // Función para mostrar notificaciones de error
+  const showErrorNotification = (error: any) => {
+    notification.error({
+      message: "Error",
+      description: error,
+      placement: "topRight", // Cambia la ubicación según tus necesidades
+    });
+  };
   useEffect(() => {
     getPlanService();
   }, []);
@@ -30,6 +45,70 @@ export default function PlanServiceList() {
       });
     }
   };
+  const inactivePlanService = async (planServiceId: number) => {
+    const requestBody = {
+      planServiceId: planServiceId,
+    };
+    console.log(requestBody, "planServiceId");
+  
+    try {
+      const response = await fetch("/api/inactivePlanservice", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+      console.log(requestBody, 'body')
+      if (response.ok) {
+        console.log(response, 'error data');
+        await response.json();
+        showSuccessNotification("Plan de servicio ha sido dado de baja con exito!!");
+       
+      } else {
+        const errorData = await response.json();
+        console.log(errorData, 'error data');
+        showErrorNotification(
+          errorData.message || "Plan de servicio ya se encuentra desactivado"
+        );
+      }
+    } catch (error) {
+      console.log(error, 'error data');
+      showErrorNotification(error || "Error de conexion, consulte con soporte");
+    }
+  };
+
+  const activePlanService = async (planServiceId: number) => {
+    const requestBody = {
+      planServiceId: planServiceId,
+    };
+    console.log(requestBody, "planServiceId");
+  
+    try {
+      const response = await fetch("/api/activePlanService", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+  
+      if (response.ok) {
+        await response.json();
+        showSuccessNotification("Plan de servicio ha sido dado de baja con exito!!");
+       
+      } else {
+        const errorData = await response.json();
+        console.log(errorData, 'error data');
+        showErrorNotification(
+          errorData.message || "Plan de servicio ya se encuentra activado"
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorNotification(error || "Error de conexion, consulte con soporte");
+    }
+  };
 
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
@@ -45,17 +124,21 @@ export default function PlanServiceList() {
     {
       title: 'Precio',
       width: 100,
-      render: (item: any)=>  item.price ?? 'No Data',
+      render: (item: any)=>  '$' + item.price ?? 'No Data',
       key: 'price',
       sorter: true,
     },
     {
       title: 'Descripcion',
       width: 100,
-      render: (item: any)=>  item.description ?? 'No Data',
+      render: (item: any) => (
+        <div style={{ textAlign: 'justify' }}>
+          {item.description ?? 'No Data'}
+        </div>
+      ),
       key: 'description',
       sorter: true,
-    },
+    },    
     {
       title: 'Hora inicio',
       width: 100,
@@ -80,9 +163,33 @@ export default function PlanServiceList() {
     {
       title: 'Acciones',
       key: 'operation',
-      fixed: 'right',
       width: 100,
-      render: () => <Button>Editar</Button>,
+      render: (item: any ) => (
+        <div>
+          <Popconfirm
+            title="Desactivar"
+            description="¿Esta seguro que quiere desactivar a este plan?"
+            icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
+            onConfirm={() => inactivePlanService(item.plan_serviceId)}
+            onCancel={() => console.log("Cancelar confirmación")}
+            okText="Sí"
+            cancelText="No"
+          >
+            <Button style={{ width: '150px', marginBottom: '20px' }} danger>Desactivar</Button>
+          </Popconfirm>
+          <Popconfirm
+            title="Activar"
+            description="¿Esta seguro de activar este plan?"
+            icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
+            onConfirm={() => activePlanService(item.plan_serviceId)}
+            onCancel={() => console.log("Cancelar confirmación")}
+            okText="Sí"
+            cancelText="No"
+          >
+            <Button style={{ width: '150px', marginBottom: '20px' }} type="primary">Activar</Button>
+          </Popconfirm>
+        </div>
+      ),
     },
   ];
 

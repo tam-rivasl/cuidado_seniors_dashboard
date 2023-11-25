@@ -530,15 +530,19 @@ export default function Home() {
     {
       title: "Price",
       width: 100,
-      render: (item: any) => item.plan_service?.price ?? "No Data",
+      render: (item: any) => '$' + item.plan_service?.price ?? "No Data",
       key: "plan_service",
       sorter: true,
     },
     {
-      title: "Description",
+      title: 'Descripcion',
       width: 100,
-      render: (item: any) => item.plan_service?.description ?? "No Data",
-      key: "plan_service",
+      render: (item: any) => (
+        <div style={{ textAlign: 'justify' }}>
+          {item.plan_service?.description ?? 'No Data'}
+        </div>
+      ),
+      key: 'description',
       sorter: true,
     },
     {

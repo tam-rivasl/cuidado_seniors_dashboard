@@ -71,6 +71,9 @@ const App: React.FC = () => {
   return (
     <div className="container">
       <Card className="card-login">
+      <Link href="/" color='primary'>
+            Volver a Inicio
+          </Link>
         <img
           src="/img/logo.png"
           className="logo"
@@ -116,11 +119,6 @@ const App: React.FC = () => {
               placeholder="Ingresa tu contraseña"
             />
           </Form.Item>
-
-          <Form.Item name="remember" valuePropName="checked">
-            <Checkbox>Recordar</Checkbox>
-          </Form.Item>
-
           <Form.Item>
             <Button
               type="primary"

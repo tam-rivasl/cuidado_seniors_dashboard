@@ -1,80 +1,94 @@
-"use client"
-import React, { useState } from 'react';
-import type { MenuProps } from 'antd';
-import { message, Layout, theme, Button, Col, Row, DatePicker, Select, Form, Input } from 'antd';
-import MenuComponent from '@/components/menu';
-
-const {Content, Footer, Sider } = Layout;
-
-type MenuItem = Required<MenuProps>['items'][number];
-
-function getItem(
-  label: React.ReactNode,
-  key: React.Key,
-  icon?: React.ReactNode,
-  children?: MenuItem[],
-): MenuItem {
-  return {
-    key,
-    icon,
-    children,
-    label,
-  } as MenuItem;
-}
-
+"use client";
+import React, { useState } from "react";
+import {
+  Layout,
+  Button,
+  Col,
+  Row,
+  DatePicker,
+  Select,
+  Form,
+  Input,
+  Checkbox,
+  notification,
+  InputNumber,
+} from "antd";
+import MenuComponent from "@/components/menu";
+const { Content, Footer, Sider } = Layout;
 export default function Home() {
   const [collapsed, setCollapsed] = useState(false);
-  const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
-  const [messageApi] = message.useMessage();
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
+  const [formData] = Form.useForm();
+  const showErrorNotification = (error: any) => {
+    notification.error({
+      message: "Error",
+      description: error,
+      placement: "topRight",
+    });
+  };
 
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
+  const showSuccessNotification = (message: any) => {
+    notification.success({
+      message: "Éxito",
+      description: message,
+      placement: "topRight",
+    });
+  };
 
-  const onFinish = (form: any) => {
-    console.log('form:', form)
-    fetch('/api/createUser', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(form),
-    })
-      .then((_) => {
-        messageApi.open({
-          type: 'success',
-          content: 'Usuario creado correctamente !!',
-        });
-      })
-      .catch((error) => {
-        messageApi.open({
-          type: 'error',
-          content: error,
-        });
+  const onFinish = async (form: any) => {
+    try {
+      console.log("form:", form);
+      const response = await fetch("/api/createUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
       });
+      console.log("Response status:", response.status);
+      if (response.ok) {
+        console.log("wtf??");
+        showSuccessNotification("Usuario registrado  exitosamente !!");
+        formData.resetFields();
+      } else {
+        const data = await response.json();
+        formData.resetFields();
+        console.log("eror data else:", data.error);
+        showErrorNotification(
+          data.error ||
+            "Error al crear usuario, revice si lleno los ratos correctamente"
+        );
+      }
+    } catch (error) {
+      showErrorNotification(
+        error.message || "Error de conexion, consulte soporte"
+      );
+      formData.resetFields();
+    }
   };
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
   };
-  const onFinishFailed = (errorInfo: any) => {
-    messageApi.open({
-      type: 'error',
-      content: 'Debe rellenar los campos correctamente!',
-    });
-  };
 
   return (
-    <Layout style={{ minHeight: '100vh' }} >
-        <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+      >
         <div className="demo-logo-vertical" />
-        <MenuComponent selectedKeys={selectedKeys} onMenuSelect={handleMenuSelect} />
+        <MenuComponent
+          selectedKeys={selectedKeys}
+          onMenuSelect={handleMenuSelect}
+        />
       </Sider>
       <Layout>
         <Content>
           <Form
+            form={formData}
             name="basic"
             onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
             layout="vertical"
             style={{
               boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
@@ -90,55 +104,45 @@ export default function Home() {
                 <Form.Item
                   label="Nombre"
                   name="firstName"
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' },
-                  ]}
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Input />
+                  <Input size="large" />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
                   label="Apellido"
                   name="lastName"
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' }
-                  ]}
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Input />
+                  <Input size="large" />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
                   label="Email"
                   name="email"
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' }
-                  ]}
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Input />
+                  <Input size="large" />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
                   label="Telefono"
                   name="phoneNumber"
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' }
-                  ]}
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Input />
+                  <InputNumber size="large" min={1} style={{ width: "100%" }} />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
                   label="RUT"
                   name="identificationNumber"
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' }
-                  ]}
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Input />
+                  <Input size="large" />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
@@ -146,9 +150,7 @@ export default function Home() {
                   label="Fecha Nacimiento"
                   name="birthDate"
                   style={{ width: "100%" }}
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' }
-                  ]}
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
                   <DatePicker style={{ width: "100%" }} />
                 </Form.Item>
@@ -157,33 +159,27 @@ export default function Home() {
                 <Form.Item
                   label="Edad"
                   name="age"
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' }
-                  ]}
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Input />
+                  <InputNumber size="large" min={1} style={{ width: "100%" }} />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
                   label="Direccion"
                   name="adress"
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' }
-                  ]}
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Input />
+                  <Input size="large" />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
                 <Form.Item
                   label="Genero"
                   name="gender"
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' }
-                  ]}
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Select>
+                  <Select size="large" >
                     <Select.Option value="male">Hombre</Select.Option>
                     <Select.Option value="female">Mujer</Select.Option>
                   </Select>
@@ -193,27 +189,32 @@ export default function Home() {
                 <Form.Item
                   label="Contraseña"
                   name="password"
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' }
-                  ]}
+                  rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Input.Password />
+                  <Input.Password size="large" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item name="nurseConfirmation" valuePropName="checked">
+                  <Checkbox style={{ paddingTop: 35 }}>
+                    ¿El usuario es enfermera/o?
+                  </Checkbox>
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
-              <Button
+                <Button
                   type="primary"
                   htmlType="submit"
                   style={{ width: "100%", marginTop: 30 }}
                 >
-                  Registrarse
+                  Registrar
                 </Button>
               </Col>
             </Row>
           </Form>
         </Content>
-        <Footer style={{ textAlign: 'center' }}></Footer>
+        <Footer style={{ textAlign: "center" }}></Footer>
       </Layout>
     </Layout>
-  )
+  );
 }

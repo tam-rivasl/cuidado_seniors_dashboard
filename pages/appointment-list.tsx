@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Layout, theme, Button, message } from 'antd';
+import { Table, Layout, theme, Button, message, Popconfirm, notification } from 'antd';
 import MenuComponent from '../components/menu'; // Ajusta la ruta de importación según la ubicación de MenuComponent
 import moment from 'moment';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import router from 'next/router';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -15,6 +17,29 @@ export default function Home() {
     getAppointment();
   }, []);
 
+  const showSuccessNotification = (message: any) => {
+    notification.success({
+      message: "Éxito",
+      description: message,
+      placement: "topRight", // Cambia la ubicación según tus necesidades
+    });
+  };
+  // Función para mostrar notificaciones de error
+  const showErrorNotification = (error: any) => {
+    notification.error({
+      message: "Error",
+      description: error,
+      placement: "topRight", // Cambia la ubicación según tus necesidades
+    });
+  };
+
+  const showInfoNotification = (message: any) => {
+    notification.info({
+      message: "Info",
+      description: message,
+      placement: "topRight", // Cambia la ubicación según tus necesidades
+    });
+  };
   const getAppointment = async () => {
     try {
       const response = await fetch('/api/getAppointment');
@@ -35,7 +60,56 @@ export default function Home() {
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
   };
-
+  const confirmCancelarCita = async (appointmentId: number) => {
+    const requestBody = {
+      appointmentId: appointmentId,
+    };
+    console.log(requestBody, "id apointment");
+  
+    try {
+      const response = await fetch("/api/cancelAppointment", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+  
+      if (response.ok) {
+        await response.json();
+        showSuccessNotification("Cita Cancelada con éxito");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+       
+      } else {
+        const errorData = await response.json();
+        console.log(errorData.message, 'error data');
+        showErrorNotification(
+          errorData.message || "Cita ya se encuentra cancelada o expirada"
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorNotification(error || "Error al consultar API");
+    }
+  };
+  interface Appointment {
+    appointmentId: number;
+    plan_service?: {
+      planServiceName: string;
+      price: number;
+      description: string;
+      startTime: Date;
+      endTime: Date;
+    };
+    status: string;
+    date: Date;
+    nurse?: {
+      firstName: string;
+      lastName: string;
+    };
+  }
   const columns = [
     {
       title: 'Nombre Enfermera',
@@ -94,11 +168,25 @@ export default function Home() {
       sorter: true,
     },
     {
-      title: 'Acciones',
-      key: 'operation',
-      fixed: 'right',
+      title: "Acciones",
+      key: "operation",
+      fixed: "right",
       width: 150,
-      render: () => <Button>Editar</Button>,
+      render: (item: Appointment) => (
+        <div>
+          <Popconfirm
+            title="Cancelar Cita"
+            description="¿Esta seguro de anular su cita?"
+            icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
+            onConfirm={() => confirmCancelarCita(item.appointmentId)}
+            onCancel={() => console.log("Cancelar confirmación")}
+            okText="Sí"
+            cancelText="No"
+          >
+            <Button style={{ width: '150px', marginBottom: '20px' }} danger>Cancelar cita</Button>
+          </Popconfirm>
+        </div>
+      ),
     },
   ];
 

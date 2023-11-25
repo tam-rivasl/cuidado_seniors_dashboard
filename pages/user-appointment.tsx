@@ -289,7 +289,7 @@ export default function userAppointment() {
                   <TimePicker
                     format="HH:mm"
                     style={{ width: "100%" }}
-                    inputReadOnly
+                    disabled
                   />
                 </Form.Item>
               </Col>
@@ -302,7 +302,7 @@ export default function userAppointment() {
                   <TimePicker
                     format="HH:mm"
                     style={{ width: "100%" }}
-                    inputReadOnly
+                    disabled
                   />
                 </Form.Item>
               </Col>
@@ -312,7 +312,7 @@ export default function userAppointment() {
                   name="description"
                   rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Input style={{ width: "100%" }} readOnly />
+                  <Input style={{ width: "100%" }} disabled />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>
@@ -321,7 +321,7 @@ export default function userAppointment() {
                   name="price"
                   rules={[{ required: true, message: "Campo obligatorio" }]}
                 >
-                  <Input style={{ width: "100%" }} readOnly />
+                  <Input style={{ width: "100%" }} disabled />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12} xl={8}>

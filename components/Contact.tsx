@@ -21,19 +21,19 @@ const AppFooter: React.FC = () => {
         <Col xs={24} sm={12} md={6}>
           <div>
            
-            <p>  <PhoneOutlined /> Teléfono: +123-456-7890</p>
+            <p>  <PhoneOutlined /> Teléfono: +569 45678908</p>
           </div>
         </Col>
         <Col xs={24} sm={12} md={6}>
           <div>
            
-            <p>  <EnvironmentOutlined /> Dirección: Calle Ejemplo, Ciudad</p>
+            <p>  <EnvironmentOutlined /> Dirección: Calle san Martin, Santiago Centro</p>
           </div>
         </Col>
         <Col xs={24} sm={12} md={6}>
           <div>
            
-            <p>  <MailOutlined /> correo@tuempresa.com</p>
+            <p>  <MailOutlined /> cuidado_senior@gmail.com</p>
           </div>
         </Col>
       </Row>

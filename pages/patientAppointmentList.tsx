@@ -183,7 +183,7 @@ export default function PatientAppointmentList() {
       key: "price",
       width: 100,
       sorter: true,
-      render: (text: string) => text || "No Data",
+      render: (text: string) => '$' + text || "No Data",
     },
     {
       title: "Descripcion",
@@ -191,7 +191,11 @@ export default function PatientAppointmentList() {
       key: "description",
       width: 100,
       sorter: true,
-      render: (text: string) => text || "No Data",
+      render: (text: string) => (
+        <div style={{ textAlign: 'justify' }}>
+          {text || "No Data"}
+        </div>
+          ),
     },
     {
       title: "Hora de inicio",

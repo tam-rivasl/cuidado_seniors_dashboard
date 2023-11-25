@@ -2,9 +2,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const mapedData = { ...req.body };
-    console.log('dataaaa', mapedData);
+    console.log('dataaa', mapedData);
     const apiUrl: string =
-      process.env.NEXT_PUBLIC_API_URL + "/user/update/status/" + req.body.userId;
+      process.env.NEXT_PUBLIC_API_URL + "/plan-service/active/" + req.body.planServiceId;
     const response = await fetch(apiUrl, {
       method: "PATCH",
       headers: {
@@ -19,7 +19,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     } else {
       const errorData = await response.json();
       console.error('Error en la solicitud API:', errorData.message);
-      throw new Error(errorData.message || "Usuario ya se encuentra inactivo");
+      throw new Error(errorData.message || "Plan de servicio ya se encuentra inactivo");
     }
   } catch (error) {
     console.error('Error en la conexion de la API', error);

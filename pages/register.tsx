@@ -1,8 +1,6 @@
 import React from "react";
 import { LoginOutlined, UserOutlined } from "@ant-design/icons";
-import type { MenuProps } from "antd";
 import {
-  message,
   Button,
   Col,
   Row,
@@ -12,69 +10,71 @@ import {
   Input,
   Card,
   Checkbox,
+  notification,
+  InputNumber,
 } from "antd";
-
-type MenuItem = Required<MenuProps>["items"][number];
-
-function getItem(
-  label: React.ReactNode,
-  key: React.Key,
-  icon?: React.ReactNode,
-  children?: MenuItem[]
-): MenuItem {
-  return {
-    key,
-    icon,
-    children,
-    label,
-  } as MenuItem;
-}
-
+import Link from 'next/link';
 export default function Home() {
-  const [messageApi] = message.useMessage();
-
-  const onFinish = (form: any) => {
-    console.log("form:", form);
-    fetch("/api/createUser", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    })
-      .then((_) => {
-        messageApi.open({
-          type: "success",
-          content: "Usuario creado correctamente !!",
-        });
-      })
-      .catch((error) => {
-        messageApi.open({
-          type: "error",
-          content: error,
-        });
-      });
+  const [formData] = Form.useForm();
+  const showErrorNotification = (error: any) => {
+    notification.error({
+      message: "Error",
+      description: error,
+      placement: "topRight",
+    });
   };
 
-  const onFinishFailed = (errorInfo: any) => {
-    messageApi.open({
-      type: "error",
-      content: "Debe rellenar los campos correctamente!",
+  const showSuccessNotification = (message: any) => {
+    notification.success({
+      message: "Éxito",
+      description: message,
+      placement: "topRight",
     });
+  };
+  const onFinish = async (form: any) => {
+    try {
+      console.log("form:", form);
+      const response = await fetch("/api/createUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+      if (response.ok) {
+        showSuccessNotification("Usuario registrado  exitosamente !!");
+        formData.resetFields();
+        window.location.href = "/login";
+      } else {
+        formData.resetFields();
+        const data = await response.json();
+        showErrorNotification(
+          data.error ||
+            "Error al crear usuario, revice si lleno los ratos correctamente"
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorNotification(error || "Error de conexion, consulte soporte");
+      formData.resetFields();
+    }
   };
 
   return (
     <div className="container">
       <Card className="card-register">
-      <img
-        src="/img/register.png" // Ruta relativa a la carpeta "public"
-        className="logo-register"
-        alt="logo-register"
-      />
+      <Link href="/" color='primary'>
+            Volver a Inicio
+          </Link>
+        <img
+          src="/img/register.png" // Ruta relativa a la carpeta "public"
+          className="logo-register"
+          alt="logo-register"
+        />
         <Form
+          form={formData}
           name="basic"
           onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
           layout="vertical"
         >
           <Row gutter={16}>
@@ -82,11 +82,10 @@ export default function Home() {
               <Form.Item
                 label="Nombre"
                 name="firstName"
-                rules={[
-                  { required: true, message: "Campo obligatorio" },
-                ]}
+                rules={[{ required: true, message: "Campo obligatorio" }]}
               >
                 <Input
+                  size="large"
                   className="your-custom-class"
                   prefix={<UserOutlined className="site-form-item-icon" />}
                   placeholder="Nombre"
@@ -97,11 +96,10 @@ export default function Home() {
               <Form.Item
                 label="Apellido"
                 name="lastName"
-                rules={[
-                  { required: true, message: "Campo obligatorio" },
-                ]}
+                rules={[{ required: true, message: "Campo obligatorio" }]}
               >
                 <Input
+                  size="large"
                   className="your-custom-class"
                   prefix={<UserOutlined className="site-form-item-icon" />}
                   placeholder="Apellido"
@@ -112,11 +110,10 @@ export default function Home() {
               <Form.Item
                 label="Email"
                 name="email"
-                rules={[
-                  { required: true, message: "Campo obligatorio" },
-                ]}
+                rules={[{ required: true, message: "Campo obligatorio" }]}
               >
                 <Input
+                  size="large"
                   className="your-custom-class"
                   prefix={<UserOutlined className="site-form-item-icon" />}
                   placeholder="Email"
@@ -127,11 +124,12 @@ export default function Home() {
               <Form.Item
                 label="Telefono"
                 name="phoneNumber"
-                rules={[
-                  { required: true, message: "Campo obligatorio" },
-                ]}
+                rules={[{ required: true, message: "Campo obligatorio" }]}
               >
-                <Input
+                <InputNumber
+                  size="large"
+                  min={1}
+                  style={{ width: "100%" }}
                   className="your-custom-class"
                   prefix={<UserOutlined className="site-form-item-icon" />}
                   placeholder="Telefono"
@@ -142,11 +140,10 @@ export default function Home() {
               <Form.Item
                 label="RUT"
                 name="identificationNumber"
-                rules={[
-                  { required: true, message: "Campo obligatorio" },
-                ]}
+                rules={[{ required: true, message: "Campo obligatorio" }]}
               >
                 <Input
+                  size="large"
                   className="your-custom-class"
                   prefix={<UserOutlined className="site-form-item-icon" />}
                   placeholder="RUT"
@@ -158,9 +155,7 @@ export default function Home() {
                 label="Fecha Nacimiento"
                 name="birthDate"
                 style={{ width: "100%" }}
-                rules={[
-                  { required: true, message: "Campo obligatorio" },
-                ]}
+                rules={[{ required: true, message: "Campo obligatorio" }]}
               >
                 <DatePicker
                   style={{ width: "100%" }}
@@ -172,11 +167,12 @@ export default function Home() {
               <Form.Item
                 label="Edad"
                 name="age"
-                rules={[
-                  { required: true, message: "Campo obligatorio" },
-                ]}
+                rules={[{ required: true, message: "Campo obligatorio" }]}
               >
-                <Input
+                <InputNumber
+                  size="large"
+                  min={1}
+                  style={{ width: "100%" }}
                   className="your-custom-class"
                   prefix={<UserOutlined className="site-form-item-icon" />}
                   placeholder="Edad"
@@ -184,25 +180,22 @@ export default function Home() {
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-                <Form.Item
-                  label="Direccion"
-                  name="adress"
-                  rules={[
-                    { required: true, message: 'Campo obligatorio' }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </Col>
+              <Form.Item
+                label="Direccion"
+                name="adress"
+                rules={[{ required: true, message: "Campo obligatorio" }]}
+              >
+                <Input size="large" />
+              </Form.Item>
+            </Col>
             <Col xs={24} md={12}>
               <Form.Item
                 label="Genero"
                 name="gender"
-                rules={[
-                  { required: true, message: "Campo obligatorio" },
-                ]}
+                rules={[{ required: true, message: "Campo obligatorio" }]}
               >
                 <Select
+                size="large"
                   className="your-custom-class"
                   placeholder="Seleccione su género"
                 >
@@ -215,26 +208,30 @@ export default function Home() {
               <Form.Item
                 label="Contraseña"
                 name="password"
-                rules={[
-                  { required: true, message: "Campo obligatorio" },
-                ]}
+                rules={[{ required: true, message: "Campo obligatorio" }]}
               >
                 <Input.Password
+                  size="large"
                   className="your-custom-class"
                   placeholder="Contraseña"
                 />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item
-                name="nurseConfirmation"   
-                valuePropName="checked"
-              >
-                 <Checkbox style={{paddingTop:35}}>¿Eres enfermera/o?</Checkbox>
+              <Form.Item name="nurseConfirmation" valuePropName="checked">
+                <Checkbox style={{ paddingTop: 35 }}>
+                  ¿Eres enfermera/o?
+                </Checkbox>
               </Form.Item>
             </Col>
             <Col xs={24}>
-              <Button htmlType="submit" block className="w-100" type="primary"  icon={<LoginOutlined />}>
+              <Button
+                htmlType="submit"
+                block
+                className="w-100"
+                type="primary"
+                icon={<LoginOutlined />}
+              >
                 Registrarse
               </Button>
             </Col>

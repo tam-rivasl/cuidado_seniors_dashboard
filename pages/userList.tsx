@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Layout, theme, Button, message } from 'antd';
+import { Table, Layout, theme, Button, message, Popconfirm, notification } from 'antd';
 import MenuComponent from '../components/menu'; // Ajusta la ruta de importación según la ubicación de MenuComponent
 import moment from 'moment';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -15,7 +16,21 @@ export default function Home() {
     console.log(localStorage.getItem('email'))
     getUsers();
   }, []);
-
+  const showSuccessNotification = (message: any) => {
+    notification.success({
+      message: "Éxito",
+      description: message,
+      placement: "topRight", // Cambia la ubicación según tus necesidades
+    });
+  };
+  // Función para mostrar notificaciones de error
+  const showErrorNotification = (error: any) => {
+    notification.error({
+      message: "Error",
+      description: error,
+      placement: "topRight", // Cambia la ubicación según tus necesidades
+    });
+  };
   const getUsers = async () => {
     try {
       const response = await fetch('/api/getUsers');
@@ -37,6 +52,41 @@ export default function Home() {
     setSelectedKeys(keys);
   };
 
+  const inactiveUser = async (userId: number) => {
+    const requestBody = {
+      userId: userId,
+    };
+    console.log(requestBody, "id USUARIO");
+  
+    try {
+      const response = await fetch("/api/inactiveUser", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+  
+      if (response.ok) {
+        await response.json();
+        showSuccessNotification("Usuario ha sido dado de baja con exito!!");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+       
+      } else {
+        const errorData = await response.json();
+        console.log(errorData, 'error data');
+        showErrorNotification(
+          errorData.message || "Usuario ya se encuentra desactivado"
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorNotification(error || "Error al consultar API, consulte con soporte");
+    }
+  };
+  
   const columns = [
     {
       title: 'Nombre',
@@ -96,11 +146,32 @@ export default function Home() {
       sorter: true,
     },
     {
+      title: 'Status',
+      width: 150,
+      dataIndex: 'status',
+      key: 'status',
+      sorter: true,
+    },
+    {
       title: 'Acciones',
       key: 'operation',
       fixed: 'right',
       width: 100,
-      render: () => <Button>Editar</Button>,
+      render: (item: any ) => (
+        <div>
+          <Popconfirm
+            title="Cancelar Cita"
+            description="¿Esta seguro que quiere dar de baja a este usuario?"
+            icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
+            onConfirm={() => inactiveUser(item.userId)}
+            onCancel={() => console.log("Cancelar confirmación")}
+            okText="Sí"
+            cancelText="No"
+          >
+            <Button style={{ width: '150px', marginBottom: '20px' }} danger>Dar de baja</Button>
+          </Popconfirm>
+          </div>
+      ),
     },
   ];
 

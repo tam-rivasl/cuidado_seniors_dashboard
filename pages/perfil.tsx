@@ -239,7 +239,7 @@ export default function UserProfile() {
     },
     {
       label: "Fecha de Nacimiento",
-      children: moment(user.birthDate).format("DD/MM/YYYY")  || "N/A",
+      children: moment.utc(user.birthDate).format("DD/MM/YYYY")  || "N/A",
     },
     {
       label: "Número de Teléfono",
@@ -249,11 +249,6 @@ export default function UserProfile() {
       label: "Email",
       children: user.email || "N/A",
     },
-    {
-      label: "Direccion",
-      children: user.address || "N/A",
-    },
-
     {
       label: "Direccion",
       children: user.address || "N/A",

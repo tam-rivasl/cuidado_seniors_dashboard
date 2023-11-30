@@ -1,170 +1,164 @@
-//sirve para ficha medica y agregar usuario nuevo.
 import React, { useEffect, useState } from 'react';
-import { Table, Layout, notification, Button, Form, Input, Modal} from 'antd';
-import MenuComponent from '../components/menu'; // Ajusta la ruta de importación según la ubicación de MenuComponent
+import { Table, Layout, Button, message, Popconfirm, notification } from 'antd';
+import MenuComponent from '../components/menu';
+import moment from 'moment';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
+const { Header, Content, Footer, Sider } = Layout;
 
-const { Content, Footer, Sider } = Layout;
-
-export default function Home() {
+const Home = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [list, setList] = useState([] as Array<any>);
-  const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
-  const [userId, setUserId] = useState('' as any);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [messageApi] = message.useMessage();
+  const [list, setList] = useState([]);
+  const [selectedKeys, setSelectedKeys] = useState(['1']);
+  const [selectedRow, setSelectedRow] = useState(null);
+
   useEffect(() => {
-    const userId: any = localStorage.getItem("userId");
-    if (userId) {
-        console.log('user id lo encontro', userId)
-      setUserId(parseInt(userId)); // Establece el nombre del usuario en el estado
-    }
+    console.log(localStorage.getItem('email'))
+    getUsers();
   }, []);
-  useEffect(() => {
-    getAppointmentNurses();
-  }, [userId]);
+
+  const showSuccessNotification = (message) => {
+    notification.success({
+      message: "Éxito",
+      description: message,
+      placement: "topRight",
+    });
+  };
+
+  const showErrorNotification = (error) => {
+    notification.error({
+      message: "Error",
+      description: error,
+      placement: "topRight",
+    });
+  };
+
+  const getUsers = async () => {
+    try {
+      const response = await fetch('/api/getUsers');
+      if (!response.ok) {
+        throw new Error('La solicitud no tuvo éxito');
+      }
+      const data = await response.json();
+      console.log('data', data);
+      setList(data);
+    } catch (error) {
+      messageApi.open({
+        type: 'error',
+        content: error?.message ?? 'La solicitud no tuvo éxito',
+      });
+    }
+  };
+
+  const getUserData = async (userId) => {
+    try {
+      const requestBody = {
+        userId: userId
+      };
+      const response = await fetch("/api/getUserById", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data, "data user ficha");
+        if (data && !data.patient_medicalRecord) {
+          console.log("tiene data?", data);
+        }
+      } else {
+        const data = await response.json();
+        showErrorNotification(
+          data.error || "Error al traer los datos de usuario, consulte soporte"
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorNotification(error || "Error de conexión, consulte soporte");
+    }
+  }
+
+  const handleRowClick = (record, rowIndex) => {
+    setSelectedRow(record);
+    getUserData(record.userId);
+  };
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
   };
-
-  const handleOpenModal = () => {
-    setModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalVisible(false);
-  };
-
- // Renderizar el formulario dentro del modal
- const ModalForm = (
-  <Modal
-    title="Agregar Cita"
-    open={modalVisible}
-    onCancel={handleCloseModal}
-    footer={null}
-  >
-    {/* Aquí deberías poner tu formulario */}
-    <Form>
-      <Form.Item label="Campo 1">
-        <Input />
-      </Form.Item>
-      {/* Agrega más campos según tus necesidades */}
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          Guardar
-        </Button>
-      </Form.Item>
-    </Form>
-  </Modal>
-);
-
-  // Función para mostrar notificaciones de error
-  const showErrorNotification = (error: any) => {
-    notification.error({
-      message: 'Error',
-      description: error,
-      placement: 'topRight', // Cambia la ubicación según tus necesidades
-    });
-  };
-  
- const getAppointmentNurses = ()=> {
-    const requestBody = {
-        userId: userId,
-        };
-    fetch("/api/getAppointmentNurse", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  })
-    .then(async (response) => {
-      if (response.ok) {
-        const data = await response.json();
-        setList(data[0])
-      } else {
-        response.json().then((data) => {
-          showErrorNotification(data.message || "Error al cargar el listado de citas ");
-        });
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      showErrorNotification(error.message || "Error al consultar Api ");
-    });
+  const rowSelection = {
+    // Puedes ajustar la configuración de rowSelection según tus necesidades
+    // Consulta la documentación de Ant Design para obtener más detalles: https://ant.design/components/table/#components-table-demo-row-selection
   };
 
   const columns = [
     {
-      title: 'Plan Service Name',
+      title: 'Nombre',
       width: 100,
-      render: (item: any)=>  item.plan_service?.planServiceName ?? 'No Data',
-      key: 'plan_service',
+      dataIndex: 'firstName',
+      key: 'firstName',
       sorter: true,
     },
+    // ... (otras columnas)
     {
-      title: 'Price',
+      title: 'Acciones',
+      key: 'operation',
+      fixed: 'right',
       width: 100,
-      render: (item: any)=>  item.plan_service?.price ?? 'No Data',
-      key: 'plan_service',
-      sorter: true,
+      render: (item) => (
+        <div>
+          <Popconfirm
+            title="Cancelar Cita"
+            description="¿Está seguro de que quiere dar de baja a este usuario?"
+            icon={<QuestionCircleOutlined style={{ color: 'red' }}/>}
+            onConfirm={() => inactiveUser(item.userId)}
+            onCancel={() => console.log("Cancelar confirmación")}
+            okText="Sí"
+            cancelText="No"
+          >
+            <Button style={{ width: '150px', marginBottom: '20px' }} danger>Dar de baja</Button>
+          </Popconfirm>
+        </div>
+      ),
     },
-    {
-      title: 'Description',
-      width: 100,
-      render: (item: any)=>  item.plan_service?.description ?? 'No Data',
-      key: 'plan_service',
-      sorter: true,
-    },
-    {
-      title: 'Start Time',
-      width: 100,
-      render: (item: any)=>  item.plan_service?.startTime ?? 'No Data',
-      key: 'plan_service',
-      sorter: true,
-    },
-    {
-      title: 'End Time',
-      width: 100,
-      render: (item: any)=>  item.plan_service?.endTime ?? 'No Data',
-      key: 'plan_service',
-      sorter: true,
-    },
-    {
-      title: 'Status',
-      width: 100,
-      dataIndex: 'status',
-      key: 'status',
-      sorter: true,
-    },
-    {
-      title: 'Date',
-      width: 150,
-      dataIndex: 'date',
-      key: 'date',
-      sorter: true,
-    },
-    {
-        title: 'Nombre Paciente',
-        width: 150,
-        render: (item: any)=> item.patient?.firstName  ?? 'No Data',
-        key: 'patient',
-        sorter: true,
- },
- {
-    title: 'Apellido Paciente',
-    width: 150,
-    render: (item: any)=>  item.patient?.lastName ?? 'No Data',
-    key: 'patient',
-    sorter: true,
-},
- {
-    title: 'Direccion',
-    width: 150,
-    render: (item: any)=>  item.patient?.address ?? 'No Data',
-    key: 'patient',
-    sorter: true,
-},
   ];
+
+  const inactiveUser = async (userId) => {
+    const requestBody = {
+      userId: userId,
+    };
+    console.log(requestBody, "id USUARIO");
+  
+    try {
+      const response = await fetch("/api/inactiveUser", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+  
+      if (response.ok) {
+        await response.json();
+        showSuccessNotification("Usuario ha sido dado de baja con éxito!!");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+       
+      } else {
+        const errorData = await response.json();
+        console.log(errorData, 'error data');
+        showErrorNotification(
+          errorData.message || "Usuario ya se encuentra desactivado"
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorNotification(error || "Error al consultar API, consulte con soporte");
+    }
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -173,18 +167,22 @@ export default function Home() {
       </Sider>
       <Layout>
         <Content>
-          <div  className='tabsList' style={{backgroundColor: 'Background'}}>
-          <Button type="primary" onClick={handleOpenModal}>
-              Agregar Cita
-            </Button>
-            <Table columns={columns} dataSource={list} scroll={{ x: 1300 }} />
+          <div className='tabsList' style={{ backgroundColor: 'Background' }}>
+            <Table
+              columns={columns}
+              dataSource={list}
+              scroll={{ x: 1300 }}
+              onRow={(record, rowIndex) => ({
+                onClick: () => handleRowClick(record, rowIndex),
+              })}
+              rowSelection={rowSelection}
+            />
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}></Footer>
       </Layout>
-      {ModalForm}
     </Layout>
   );
-}
+};
 
-
+export default Home;

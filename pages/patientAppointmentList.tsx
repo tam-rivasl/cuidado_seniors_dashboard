@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Table, Layout, Button, message, notification, Popconfirm } from "antd";
+import { Table, Layout, Button, notification, Popconfirm, Col, Row, DatePicker } from "antd";
 import MenuComponent from "../components/menu"; // Ajusta la ruta de importación según la ubicación de MenuComponent
 import { useRouter } from "next/router";
-import { error } from 'console';
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import moment from "moment";
 interface Appointment {
@@ -29,6 +28,11 @@ export default function PatientAppointmentList() {
   const [userId, setUserId] = useState("" as any);
   const router = useRouter();
   const { Content, Footer, Sider } = Layout;
+  const [firstDate, setFirstDate] = useState<string | null>(null);
+  const [secondDate, setSecondDate] = useState<string | null>(null);
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0); 
+  const { RangePicker } = DatePicker;
   const showSuccessNotification = (message: any) => {
     notification.success({
       message: "Éxito",
@@ -132,16 +136,49 @@ export default function PatientAppointmentList() {
       setUserId(parseInt(userId)); // Establece el nombre del usuario en el estado
     }
   }, []);
+
   useEffect(() => {
     getAppointmentNurses();
-  }, [userId]);
+  }, [userId, limit, offset]);
+
+  useEffect(() => {
+    if(userId && firstDate && secondDate){
+      getAppointmentFiltered();
+    }
+  }, [userId, firstDate, secondDate, limit, offset]);
+
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
   };
 
+  const handleDateFilterChange = (
+    dates: [moment.Moment, moment.Moment] | null
+  ) => {
+    if (dates) {
+      setFirstDate(dates[0]?.format("YYYY-MM-DD"));
+      setSecondDate(dates[1]?.format("YYYY-MM-DD"));
+    } else {
+      getAppointmentNurses()
+      setFirstDate(null);
+      setSecondDate(null);
+      setOffset(0);
+    }
+  };
+  
+  const handlePaginationChange = (page, pageSize) => {
+    setLimit(pageSize);
+    setOffset((page - 1) * pageSize);
+  };
+
+  const handleShowSizeChange = (current, size) => {
+    setLimit(size);
+    setOffset(0); // Puedes cambiar esto según tus necesidades
+  };
   const getAppointmentNurses = () => {
     const requestBody = {
       userId: userId,
+      limit: limit,
+      offset: offset,
     };
     fetch("/api/getAppointmentNurse", {
       method: "POST",
@@ -167,7 +204,40 @@ export default function PatientAppointmentList() {
         showErrorNotification(error.message || "Error al consultar Api ");
       });
   };
-
+  const getAppointmentFiltered = async () => {
+    const requestBody = {
+      userId: userId,
+      firstDate: firstDate,
+      secondDate: secondDate,
+      limit: limit,
+      offset: offset,
+    };
+    await fetch("/api/getAppointmentNursefilter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    })
+      .then(async (response) => {
+        if (response.ok) {
+          console.log(requestBody, "req")
+          const data = await response.json();
+          setList(data[0]);
+        } else {
+          response.json().then((data) => {
+            console.log(data.message, "error del contact?");
+            showErrorNotification(
+              data.message || "Error al cargar el listado de citas "
+            );
+          });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        showErrorNotification(error.message || "Error al consultar Api ");
+      });
+  };
   const columns = [
     {
       title: "Nombre Plan",
@@ -226,7 +296,7 @@ export default function PatientAppointmentList() {
       key: "date",
       width: 150,
       sorter: true,
-      render: (text: string) => moment(text).format("DD/MM/YYYY") || "No Data",
+      render: (text: string) => moment.utc(text).format("DD/MM/YYYY") || "No Data",
     },
     {
       title: "Nombre Enfermera/o",
@@ -247,7 +317,6 @@ export default function PatientAppointmentList() {
     {
       title: "Acciones",
       key: "operation",
-      fixed: "right",
       width: 150,
       render: (item: Appointment) => (
         <div>
@@ -293,7 +362,30 @@ export default function PatientAppointmentList() {
       <Layout>
         <Content>
           <div className="tabsList" style={{ backgroundColor: "Background" }}>
-            <Table columns={columns} dataSource={list} scroll={{ x: 1300 }} />
+          <Row gutter={[16, 16]}>
+              <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+              <RangePicker
+                  onChange={handleDateFilterChange}
+                  style={{ marginRight: "10px" }}
+                />
+                <Button style={{marginRight: "10px"}} danger onClick={getAppointmentNurses}>
+                  Clear
+                </Button>
+            <Table 
+            columns={columns} 
+            dataSource={list} 
+            scroll={{ x: 1300 }}
+            pagination={{
+              current: Math.floor(offset / limit) + 1,
+              total: list.length,
+              pageSize: limit,
+              onChange: handlePaginationChange,
+              showSizeChanger: true,
+              onShowSizeChange: handleShowSizeChange,
+            }}
+             />
+            </Col>
+            </Row>
           </div>
         </Content>
         <Footer style={{ textAlign: "center" }}></Footer>

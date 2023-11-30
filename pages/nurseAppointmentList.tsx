@@ -12,6 +12,8 @@ import {
   Row,
   Tabs,
   Empty,
+  DatePicker,
+  Pagination,
 } from "antd";
 import {
   AuditOutlined,
@@ -22,7 +24,6 @@ import {
 } from "@ant-design/icons";
 import MenuComponent from "@/components/menu";
 import moment from "moment";
-import { message } from "antd";
 const { Content, Footer, Sider } = Layout;
 
 export default function Home() {
@@ -39,7 +40,12 @@ export default function Home() {
   const [contactEmergency, setContact] = useState([] as Array<any>);
   const [activeTabKey, setActiveTabKey] = useState<string>("observations");
   const [medicalRecord, setMedicalRecord] = useState([] as any);
-  const [userData, setUserData] =  useState([] as Array<any>);
+  const [firstDate, setFirstDate] = useState<string | null>(null);
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0); 
+  const [secondDate, setSecondDate] = useState<string | null>(null);
+  const { RangePicker } = DatePicker;
+
   const showErrorNotification = (error: any) => {
     notification.error({
       message: "Error",
@@ -65,7 +71,13 @@ export default function Home() {
 
   useEffect(() => {
     getAppointmentNurses();
-  }, [userId]);
+  }, [userId, limit, offset]);
+
+  useEffect(() => {
+    if (userId && firstDate && secondDate) {
+      getAppointmentFiltered();
+    }
+  }, [userId, firstDate, secondDate, limit, offset]);
 
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
@@ -81,6 +93,27 @@ export default function Home() {
     setModalVisible(false);
   };
 
+  const handlePaginationChange = (page, pageSize) => {
+    setLimit(pageSize);
+    setOffset((page - 1) * pageSize);
+  };
+
+  const handleShowSizeChange = (current, size) => {
+    setLimit(size);
+    setOffset(0); // Puedes cambiar esto según tus necesidades
+  };
+  const handleDateFilterChange = (
+    dates: [moment.Moment, moment.Moment] | null
+  ) => {
+    if (dates) {
+      setFirstDate(dates[0].format("YYYY-MM-DD"));
+      setSecondDate(dates[1].format("YYYY-MM-DD"));
+    } else {
+      setFirstDate(null);
+      setSecondDate(null);
+      setOffset(0);
+    }
+  };
   const handleOpenModalDetails = async (record: any) => {
     setSelectedRow(record);
     setActiveTabKey("observations");
@@ -89,9 +122,8 @@ export default function Home() {
     const appointmentId = record?.appointmentId;
     const patientId = record?.patientId;
     if (patientId) {
-      await getMedicalRecord(patientId)
-      
-  }  
+      await getMedicalRecord(patientId);
+    }
     // Check if appointmentId is available and observations array is empty
     if (appointmentId && observations.length >= 0) {
       getObservations(appointmentId);
@@ -100,14 +132,14 @@ export default function Home() {
     if (patientId) {
       getContactEmergency(patientId);
       console.log("patient id de contact", patientId);
-    }  
+    }
     setModalDetailsVisible(true);
   };
 
   const handleCloseModalDetails = () => {
     setSelectedRow(null);
     setContact([null]);
-    setMedicalRecord([null])
+    setMedicalRecord([null]);
     setModalDetailsVisible(false);
   };
 
@@ -151,12 +183,47 @@ export default function Home() {
       handleCloseModal();
     }
   };
+  const getAppointmentFiltered = async () => {
+    const requestBody = {
+      userId: userId,
+      firstDate: firstDate,
+      secondDate: secondDate,
+      limit: limit,
+      offset: offset,
+    };
+    await fetch("/api/getAppointmentNursefilter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    })
+      .then(async (response) => {
+        if (response.ok) {
+          console.log(requestBody, "req");
+          const data = await response.json();
+          setList(data[0]);
+        } else {
+          response.json().then((data) => {
+            console.log(data.message, "error del contact?");
+            showErrorNotification(
+              data.message || "Error al cargar el listado de citas "
+            );
+          });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        showErrorNotification(error.message || "Error al consultar Api ");
+      });
+  };
 
   const getAppointmentNurses = async () => {
     const requestBody = {
       userId: userId,
+      limit: limit,
+      offset: offset,
     };
-
     await fetch("/api/getAppointmentNurse", {
       method: "POST",
       headers: {
@@ -166,6 +233,7 @@ export default function Home() {
     })
       .then(async (response) => {
         if (response.ok) {
+          console.log(requestBody, "req");
           const data = await response.json();
           setList(data[0]);
         } else {
@@ -246,26 +314,26 @@ export default function Home() {
     }
   };
   const getMedicalRecord = async (patientId: number) => {
-      const requestBody = {
-        patientId: patientId,
-      };
-      console.log('id medicaaaal', patientId)
-      const response = await fetch("/api/getMedicalRecord", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+    const requestBody = {
+      patientId: patientId,
+    };
+    console.log("id medicaaaal", patientId);
+    const response = await fetch("/api/getMedicalRecord", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log("data medical record", data);
-        setMedicalRecord(data);
-      } else {
-        const data = await response.json();
-        console.log(data, "llega la data?");
-      }
+    if (response.ok) {
+      const data = await response.json();
+      console.log("data medical record", data);
+      setMedicalRecord(data);
+    } else {
+      const data = await response.json();
+      console.log(data, "llega la data?");
+    }
   };
   const ObservationsList = () => {
     return (
@@ -387,7 +455,7 @@ export default function Home() {
           ]}
           dataSource={[interfaceMedical]}
           pagination={{ pageSize: 10 }}
-       />
+        />
       </div>
     );
   };
@@ -530,19 +598,19 @@ export default function Home() {
     {
       title: "Price",
       width: 100,
-      render: (item: any) => '$' + item.plan_service?.price ?? "No Data",
+      render: (item: any) => "$" + item.plan_service?.price ?? "No Data",
       key: "plan_service",
       sorter: true,
     },
     {
-      title: 'Descripcion',
+      title: "Descripcion",
       width: 100,
       render: (item: any) => (
-        <div style={{ textAlign: 'justify' }}>
-          {item.plan_service?.description ?? 'No Data'}
+        <div style={{ textAlign: "justify" }}>
+          {item.plan_service?.description ?? "No Data"}
         </div>
       ),
-      key: 'description',
+      key: "description",
       sorter: true,
     },
     {
@@ -570,7 +638,8 @@ export default function Home() {
       title: "Date",
       width: 150,
       dataIndex: "date",
-      render: (text: string) => moment(text).format("DD/MM/YYYY") || "No Data",
+      render: (text: string) =>
+        moment.utc(text).format("DD/MM/YYYY") || "No Data",
       key: "date",
       sorter: true,
     },
@@ -622,7 +691,6 @@ export default function Home() {
       ),
     },
   ];
-
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
@@ -640,10 +708,30 @@ export default function Home() {
           <div className="tabsList" style={{ backgroundColor: "Background" }}>
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+                <RangePicker
+                  onChange={handleDateFilterChange}
+                  style={{ marginRight: "10px" }}
+                />
+
+                <Button
+                  style={{ marginRight: "10px" }}
+                  danger
+                  onClick={getAppointmentNurses}
+                >
+                  Clear
+                </Button>
                 <Table
                   columns={columns}
                   dataSource={list}
                   scroll={{ x: 1300 }}
+                  pagination={{
+                    current: Math.floor(offset / limit) + 1,
+                    total: list.length,
+                    pageSize: limit,
+                    onChange: handlePaginationChange,
+                    showSizeChanger: true,
+                    onShowSizeChange: handleShowSizeChange,
+                  }}
                 />
               </Col>
             </Row>

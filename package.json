@@ -11,6 +11,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
     "antd": "^5.9.4",
+    "axios": "^1.6.2",
     "next": "latest",
     "react": "latest",
     "react-big-calendar": "^1.8.4",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.8",
+    "@types/mercadopago": "^1.5.11",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
@@ -26,6 +28,7 @@
     "eslint": "latest",
     "eslint-config-next": "latest",
     "postcss": "latest",
+    "sass": "^1.69.5",
     "tailwindcss": "latest",
     "typescript": "latest"
   }

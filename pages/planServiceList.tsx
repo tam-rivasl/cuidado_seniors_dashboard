@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Layout, Button, message, notification, Popconfirm } from 'antd';
+import { Table, Layout, Button, message, notification, Popconfirm, Col, Row } from 'antd';
 import MenuComponent from '../components/menu'; // Ajusta la ruta de importación según la ubicación de MenuComponent
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
@@ -10,6 +10,9 @@ export default function PlanServiceList() {
   const [messageApi] = message.useMessage();
   const [list, setList] = useState([] as Array<any>);
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['1']);
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0); 
+
   const showSuccessNotification = (message: any) => {
     notification.success({
       message: "Éxito",
@@ -28,6 +31,16 @@ export default function PlanServiceList() {
   useEffect(() => {
     getPlanService();
   }, []);
+
+  const handlePaginationChange = (page, pageSize) => {
+    setLimit(pageSize);
+    setOffset((page - 1) * pageSize);
+  };
+
+  const handleShowSizeChange = (current, size) => {
+    setLimit(size);
+    setOffset(0); // Puedes cambiar esto según tus necesidades
+  };
 
   const getPlanService = async () => {
     try {
@@ -201,7 +214,23 @@ export default function PlanServiceList() {
       <Layout>
         <Content>
           <div  className='tabsList' style={{backgroundColor: 'Background'}}>
-            <Table columns={columns} dataSource={list} scroll={{ x: 1300 }} />
+          <Row gutter={[16, 16]}>
+              <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+            <Table 
+            columns={columns} 
+            dataSource={list} 
+            scroll={{ x: 1300 }} 
+            pagination={{
+              current: Math.floor(offset / limit) + 1,
+              total: list.length,
+              pageSize: limit,
+              onChange: handlePaginationChange,
+              showSizeChanger: true,
+              onShowSizeChange: handleShowSizeChange,
+            }}
+            />
+            </Col>
+            </Row>
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}></Footer>

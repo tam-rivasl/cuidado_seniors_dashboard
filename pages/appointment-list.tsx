@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   Table,
   Layout,
-  theme,
   Button,
   message,
   Popconfirm,
@@ -14,9 +13,8 @@ import {
 import MenuComponent from "../components/menu"; // Ajusta la ruta de importación según la ubicación de MenuComponent
 import moment from "moment";
 import { QuestionCircleOutlined } from "@ant-design/icons";
-import router from "next/router";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Footer, Sider } = Layout;
 
 export default function Home() {
   const [collapsed, setCollapsed] = useState(false);
@@ -25,6 +23,9 @@ export default function Home() {
   const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
   const [firstDate, setFirstDate] = useState<string | null>(null);
   const [secondDate, setSecondDate] = useState<string | null>(null);
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0); 
+
   const { RangePicker } = DatePicker;
   
   useEffect(() => {
@@ -117,6 +118,17 @@ export default function Home() {
   const handleMenuSelect = (keys: string[]) => {
     setSelectedKeys(keys);
   };
+
+  const handlePaginationChange = (page, pageSize) => {
+    setLimit(pageSize);
+    setOffset((page - 1) * pageSize);
+  };
+
+  const handleShowSizeChange = (current, size) => {
+    setLimit(size);
+    setOffset(0); // Puedes cambiar esto según tus necesidades
+  };
+
   const confirmCancelarCita = async (appointmentId: number) => {
     const requestBody = {
       appointmentId: appointmentId,
@@ -277,6 +289,14 @@ export default function Home() {
                   Clear
                 </Button>
                 <Table
+                  pagination={{
+                    current: Math.floor(offset / limit) + 1,
+                    total: list.length,
+                    pageSize: limit,
+                    onChange: handlePaginationChange,
+                    showSizeChanger: true,
+                    onShowSizeChange: handleShowSizeChange,
+                  }}
                   columns={columns}
                   dataSource={list}
                   scroll={{ x: 1300 }}

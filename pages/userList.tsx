@@ -176,7 +176,7 @@ export default function Home() {
       sorter: true,
     },
     {
-      title: "Acciones",
+      title: "Editar",
       key: "operation",
       fixed: "right",
       width: 100,

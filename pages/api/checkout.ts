@@ -1,7 +1,8 @@
 import { CreatePreferencePayload } from "mercadopago/models/preferences/create-payload.model";
 import { NextApiRequest, NextApiResponse } from "next";
 import mercadopago from "mercadopago";
-
+//Conexecion a mercado de pago , pero no esta funcional
+//atte: tamara
 mercadopago.configure({
   access_token: process.env.NEXT_ACCESS_TOKEN!,
 });

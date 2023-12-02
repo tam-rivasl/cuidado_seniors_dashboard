@@ -405,7 +405,7 @@ export default function UserProfile() {
               <Descriptions
                 title="Mi Perfil"
                 bordered
-                column={{ xs: 1, sm: 1, md: 4, lg: 3, xl: 1, xxl: 4 }}
+                column={{ xs: 1,  md: 2, lg: 4 }}
                 items={items}
               />
             </div>
